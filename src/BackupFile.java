@@ -9,7 +9,7 @@ public class BackupFile {
 	private File file;
 //	private String nameFile;
 	private File tmpFolder;
-	private final int maxSize = 30;
+	private final int maxSize = 64 * 1000;
 	private int numChunks;
 	
 	public BackupFile(String nameFile) throws IOException, Exception{
@@ -37,6 +37,9 @@ public class BackupFile {
 				try (FileOutputStream out = new FileOutputStream(newFile)) {
 					out.write(buffer, 0, readSize);//tmp is chunk size
 				}
+			}
+			if(getSizeFile()%maxSize == 0){
+				//File = new File()
 			}
 		}catch(IOException e){
 			System.err.println("Ups i did it again");
