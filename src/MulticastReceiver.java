@@ -18,7 +18,6 @@ public class MulticastReceiver extends Thread{
 	
 	public void run(){
 		try{
-			while(true){
 				String cenas = "lmao";
 				byte[] buff = new byte[100000];
 				buff = cenas.getBytes();
@@ -27,15 +26,13 @@ public class MulticastReceiver extends Thread{
 			    data.joinGroup(address);
 			    DatagramPacket packet = new DatagramPacket(buff,buff.length);
 			    
-				while(true){
 					System.out.println("receiving");
 					data.receive(packet);
+					System.out.println("oi");
 					System.out.println(new String(packet.getData()));
 					buff = new byte[100000];
 					packet = new DatagramPacket(buff,buff.length);
-				}
-				
-			}
+					
 		}catch (IOException e){
 			System.err.println("oi");
 		}

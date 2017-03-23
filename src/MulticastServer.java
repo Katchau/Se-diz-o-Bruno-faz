@@ -31,8 +31,7 @@ public class MulticastServer{
 	      
 	      System.out.println("kek");
 	      
-	      umo.leaveGroup(group);
-	      umo.close();
+	      
 	}
 	
 }
