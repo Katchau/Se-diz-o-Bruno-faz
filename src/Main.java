@@ -20,13 +20,13 @@ import java.util.Scanner;
 //
 //lmao.assembleFile();
 
-
+//1.0 69 nao_e_preciso	MDB 230.0.0.1 4445
 
 public class Main {
 
 	public static void main(String[] args) {
 		try{
-			MulticastServer try1 = new MulticastServer(4445,"230.0.0.1");
+			MulticastServer try1 = new MulticastServer(args);
 			Scanner scani = new Scanner(System.in);
 			String banana = scani.nextLine();
 			scani.close();

@@ -9,7 +9,7 @@ public class BackupFile {
 	private File file;
 //	private String nameFile;
 	private File tmpFolder;
-	private final int maxSize = 64 * 1000;
+	public static final int maxSize = 64 * 1000; //kek
 	private int numChunks;
 	
 	public BackupFile(String nameFile) throws IOException, Exception{

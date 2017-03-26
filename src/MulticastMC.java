@@ -2,18 +2,18 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-//import java.net.MulticastSocket;
-//import java.io.IOException;
-//import java.net.DatagramSocket;
-//import java.net.MulticastSocket;
 
-public class MulticastReceiver extends Thread{
+public class MulticastMC extends Thread{
 	private MulticastSocket data;
-	private String s_ip;
+	private InetAddress address;
+	private int id;
+	private int vrs; //version xpto
 	
-	public MulticastReceiver(MulticastSocket data, String ip) throws IOException{
-		s_ip = ip;
-		this.data = data;
+	public MulticastMC(MulticastServer m) throws IOException{
+		id = m.getId();
+		address = m.getAddress();
+		vrs = m.getVersion();
+		data = m.getData();
 	}
 	
 	public void run(){
@@ -22,7 +22,6 @@ public class MulticastReceiver extends Thread{
 				byte[] buff = new byte[100000];
 				buff = cenas.getBytes();
 				
-			    InetAddress address = InetAddress.getByName(s_ip);
 			    data.joinGroup(address);
 			    DatagramPacket packet = new DatagramPacket(buff,buff.length);
 			    
@@ -38,5 +37,4 @@ public class MulticastReceiver extends Thread{
 		}
 //		data.close();
 	}
-
 }
