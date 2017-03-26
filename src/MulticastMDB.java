@@ -79,13 +79,13 @@ public class MulticastMDB extends Thread{
 			System.out.println("Oh meu ganda burro, " + path + " não existe!");
 			return;
 		}
-		String hashname = "";
+		String hashname = "Testezinho";
 		try {
-   		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
-	    	 md.update(path.getBytes("UTF-16"));
-	    	 md.update(Integer.toString((int)file.length()).getBytes());
-	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
-	    	 hashname = md.toString();
+   		 	 //MessageDigest md = MessageDigest.getInstance("SHA-256");
+//	    	 md.update(path.getBytes("UTF-16"));
+//	    	 md.update(Integer.toString((int)file.length()).getBytes());
+//	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
+//	    	 hashname = md.toString();
 		} catch (Exception e1) {
 			System.err.println("this shouldn't happen");
 		}

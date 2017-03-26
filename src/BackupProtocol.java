@@ -31,6 +31,7 @@ public class BackupProtocol extends Protocol{
 			System.out.println("Error: Message damaged!");
 			return;
 		}
+		System.out.println(headerbody[0]);
 		getHeader(headerbody[0]);
 		
 		switch(subprotocol){
@@ -52,7 +53,7 @@ public class BackupProtocol extends Protocol{
 		}
 		
 		if(headerbody.length == 2){
-			String[] data = headerbody[1].split("");//TODO esta merda ...
+			String[] data = headerbody[1].split("\u0000");//TODO esta merda ...
 			System.out.println(data.length);
 			chunk = data[0].getBytes();
 		}
