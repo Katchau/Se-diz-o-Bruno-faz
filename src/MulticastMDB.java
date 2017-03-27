@@ -51,7 +51,6 @@ public class MulticastMDB extends Thread{
 	    		DatagramPacket packet = new DatagramPacket(buff,buff.length);
 				System.out.println("receiving");
 				data.receive(packet);
-				
 				new Thread(new Runnable() {
 				     public void run() {
 				    	 String request = new String(packet.getData(), 0, packet.getLength());
@@ -91,23 +90,24 @@ public class MulticastMDB extends Thread{
 		}
 		
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-			while ((bis.read(buffer)) > 0) {
+			int readValue = 0;
+			while ((readValue = bis.read(buffer)) > 0) {
 				for(int i = 0; i < repDegree; i++)
-					sendChunk(hashname,++partCounter, buffer); //TODO falta por o timer
+					sendChunk(hashname,++partCounter, buffer, readValue); //TODO falta por o timer
 			}
 			if(file.length()%BackupFile.maxSize == 0){
 				for(int i = 0; i < repDegree; i++)
-					sendChunk(hashname,++partCounter, "".getBytes());
+					sendChunk(hashname,++partCounter, "".getBytes(),0);
 			}
 		}catch(IOException e){
 			System.err.println("Ups i did it again");
 		}
 	}
 	
-	public void sendChunk(String fileID, int n, byte[] buffer){
+	public void sendChunk(String fileID, int n, byte[] buffer, int size){
 		new Thread(new Runnable() { //ñ sei se vale a pena ter isto como thread
 		     public void run() {
-		    	 BackupProtocol bp = new BackupProtocol(vrs,id,fileID,n,repDegree,buffer);
+		    	 BackupProtocol bp = new BackupProtocol(vrs,id,fileID,n,repDegree,buffer,size);
 		    	 byte[] buff = bp.request().getBytes();
 		    	 DatagramPacket packet = new DatagramPacket(buff,buff.length, address, data.getLocalPort());
 		    	 try {

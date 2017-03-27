@@ -13,8 +13,9 @@ public class BackupProtocol extends Protocol{
 	public int delay; //ms
 	public int state; //-1 = fail 0 received 1 sending 2 last
 	public byte[] chunk;
+	public int sizeFile;
 	
-	public BackupProtocol(int version,int senderID, String fileID,int chunkN, int repDegree, byte[] chunk){
+	public BackupProtocol(int version,int senderID, String fileID,int chunkN, int repDegree, byte[] chunk, int size){
 		this.version = version;
 		this.id = senderID;
 		this.fileID = fileID;
@@ -22,6 +23,7 @@ public class BackupProtocol extends Protocol{
 		this.repDegree = repDegree;
 		this.chunk = chunk;
 		this.subprotocol = msgTypeSend;
+		this.sizeFile = size;
 	}
 	
 	public BackupProtocol(String message){
@@ -53,9 +55,7 @@ public class BackupProtocol extends Protocol{
 		}
 		
 		if(headerbody.length == 2){
-			String[] data = headerbody[1].split("\u0000");//TODO esta merda ...
-			System.out.println(data.length);
-			chunk = data[0].getBytes();
+			chunk = headerbody[1].getBytes();
 		}
 		else if(state == 0 && headerbody.length == 1){
 			chunk = "".getBytes();
@@ -75,7 +75,7 @@ public class BackupProtocol extends Protocol{
 	}
 	
 	public String request(){
-		return request(msgTypeSend) + new String(chunk, 0, chunk.length);
+		return request(msgTypeSend) + new String(chunk, 0, sizeFile);
 	}
 	
 	public String storeAnswer(){

@@ -40,8 +40,9 @@ public class MulticastServer{
 		String files = "";
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f))) {
 			byte[] buffer = new byte[1024];
-			while(bis.read(buffer) > 0){
-				files += new String(buffer);
+			int readValue = 0;
+			while((readValue = bis.read(buffer)) > 0){
+				files += new String(buffer,0,readValue);
 			}
 			String[] separate = files.split("\r\n"); //separar por new lines
 			fileB = new ArrayList<String>(Arrays.asList(separate));
