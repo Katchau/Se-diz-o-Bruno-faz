@@ -54,10 +54,10 @@ public class MulticastMDB extends Thread{
 				
 				new Thread(new Runnable() {
 				     public void run() {
-				    	String request = new String(packet.getData(), 0, packet.getLength());
-						BackupProtocol bp = new BackupProtocol(request);
-						if(bp.state == 0 /*&& bp.id != id*/){
-							bp.storeChunk();
+				    	 String request = new String(packet.getData(), 0, packet.getLength());
+						 BackupProtocol bp = new BackupProtocol(request);
+						 if(bp.state == 0 /*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
+							bp.storeChunk("" + m.getFolderIndex(bp.fileID));
 							bp.state = 1;
 							System.out.println(bp.storeAnswer());
 							//new MulticastMC(m).start();
@@ -81,11 +81,11 @@ public class MulticastMDB extends Thread{
 		}
 		String hashname = "Testezinho";
 		try {
-   		 	 //MessageDigest md = MessageDigest.getInstance("SHA-256");
-//	    	 md.update(path.getBytes("UTF-16"));
-//	    	 md.update(Integer.toString((int)file.length()).getBytes());
-//	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
-//	    	 hashname = md.toString();
+   		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
+	    	 md.update(path.getBytes("UTF-16"));
+	    	 md.update(Integer.toString((int)file.length()).getBytes());
+	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
+	    	 hashname = new String(md.digest());
 		} catch (Exception e1) {
 			System.err.println("this shouldn't happen");
 		}

@@ -62,10 +62,8 @@ public class BackupProtocol extends Protocol{
 		}
 	}
 	
-	public void storeChunk(){
-		File f = new File(fileID);
-		f.mkdir();
-		File newFile = new File(f,String.format("%06d", chunkN));
+	public void storeChunk(String folder){
+		File newFile = new File(folder,String.format("%06d", chunkN));
 		try {
 			FileOutputStream out = new FileOutputStream(newFile);
 			out.write(chunk, 0, chunk.length);
