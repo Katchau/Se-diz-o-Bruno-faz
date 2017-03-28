@@ -11,30 +11,18 @@ public class BackupProtocol extends Protocol{
 	public static final int MAXDELAY = 400;
 	public static final int TRIES = 5;
 	public int delay; //ms
-	public int state; //-1 = fail 0 received 1 sending 2 last
 	public byte[] chunk;
 	public int sizeFile;
 	
 	public BackupProtocol(int version,int senderID, String fileID,int chunkN, int repDegree, byte[] chunk, int size){
-		this.version = version;
-		this.id = senderID;
-		this.fileID = fileID;
-		this.chunkN = chunkN;
-		this.repDegree = repDegree;
+		super(version,senderID,fileID,chunkN,repDegree);
 		this.chunk = chunk;
 		this.subprotocol = msgTypeSend;
 		this.sizeFile = size;
 	}
 	
 	public BackupProtocol(String message){
-		String[] headerbody = message.split(MulticastServer.CRLF + MulticastServer.CRLF);
-		if(headerbody[0].equals(message)){
-			state = -1;
-			System.out.println("Error: Message damaged!");
-			return;
-		}
-		System.out.println(headerbody[0]);
-		getHeader(headerbody[0]);
+		super(message);
 		
 		switch(subprotocol){
 			case msgTypeSend:
@@ -54,10 +42,10 @@ public class BackupProtocol extends Protocol{
 			return;
 		}
 		
-		if(headerbody.length == 2){
-			chunk = headerbody[1].getBytes();
+		if(body != null){
+			chunk = body.getBytes();
 		}
-		else if(state == 0 && headerbody.length == 1){
+		else if(state == 0 && body == null){
 			chunk = "".getBytes();
 		}
 	}

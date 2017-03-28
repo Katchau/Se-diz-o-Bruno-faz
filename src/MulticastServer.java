@@ -12,17 +12,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MulticastServer{
-	private MulticastSocket data;
+	private MulticastSocket MCdata;
+	private InetAddress MCaddress;
+	private MulticastSocket MDBdata;
+	private InetAddress MDBaddress;
+	private MulticastSocket MDRdata;
+	private InetAddress MDRaddress;
 	private int version;
 	private int id;
-	private InetAddress address;
 	public static final String CRLF = "\r\n";
 	public ArrayList<String> fileB;
 	
-	public MulticastSocket getData() {
-		return data;
-	}
-
 	public int getVersion() {
 		return version;
 	}
@@ -31,10 +31,31 @@ public class MulticastServer{
 		return id;
 	}
 
-	public InetAddress getAddress() {
-		return address;
-	}
 	
+	public MulticastSocket getMCdata() {
+		return MCdata;
+	}
+
+	public InetAddress getMCaddress() {
+		return MCaddress;
+	}
+
+	public MulticastSocket getMDBdata() {
+		return MDBdata;
+	}
+
+	public InetAddress getMDBaddress() {
+		return MDBaddress;
+	}
+
+	public MulticastSocket getMDRdata() {
+		return MDRdata;
+	}
+
+	public InetAddress getMDRaddress() {
+		return MDRaddress;
+	}
+
 	public void loadFileStorage(){
 		File f = new File("backup.txt");
 		String files = "";
@@ -80,14 +101,19 @@ public class MulticastServer{
 	public MulticastServer(String args[]) throws IOException{
 		this.version = (int)Double.parseDouble(args[0]);
 		id = Integer.parseInt(args[1]);
-		data = new MulticastSocket(Integer.parseInt(args[4]));
-		address = InetAddress.getByName(args[3]);
+		MCdata = new MulticastSocket(Integer.parseInt(args[4]));
+		MCaddress = InetAddress.getByName(args[3]);
+		MDBdata = new MulticastSocket(Integer.parseInt(args[6]));
+		MDBaddress = InetAddress.getByName(args[5]);
+		MDRdata = new MulticastSocket(Integer.parseInt(args[8]));
+		MDRaddress = InetAddress.getByName(args[7]);
 		loadFileStorage();
-		new MulticastMDB(this).start();
+		new Listener("MDB",this).start();
+//		new MulticastMDB(this).start();
 	}
 	
 	public void clientTest() throws IOException{
-		new MulticastMDB(this,"cebas.txt",1).start();
+		new Listener("MDB",this,"cebas.txt",1);
 	}
 	
 //	public void clientTest() throws IOException{

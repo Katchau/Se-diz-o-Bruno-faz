@@ -15,60 +15,47 @@ public class MulticastMDB extends Thread{
 	private InetAddress address;
 	private int id;
 	private int vrs; //version xpto
+	private Listener l;
 	private MulticastServer m;
 	private String path = null;
 	private int repDegree;
+	private DatagramPacket packet;
 	
-	public MulticastMDB(MulticastServer m) throws IOException{
-		this.m = m;
-		id = m.getId();
-		address = m.getAddress();
+	public MulticastMDB(Listener l, DatagramPacket packet) throws IOException{
+		this.l = l;
+		this.m = l.m;
+		id = l.id;
+		address = l.address;
 		vrs = m.getVersion();
-		data = m.getData();
-		data.joinGroup(address);
+		data = l.data;
+		this.packet = packet;
+		
+		new Thread(new Runnable() {
+		     public void run() {
+		    	 String request = new String(packet.getData(), 0, packet.getLength());
+				 BackupProtocol bp = new BackupProtocol(request);
+				 if(bp.state == 0 /*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
+					bp.storeChunk("" + m.getFolderIndex(bp.fileID));
+					bp.state = 1;
+					System.out.println(bp.storeAnswer());
+					//new MulticastMC(m).start();
+				}
+		     }
+		}).start();
 	}
 	
-	public MulticastMDB(MulticastServer m, String path, int repDegree) throws IOException{
-		this.m = m;
-		id = m.getId();
-		address = m.getAddress();
+	public MulticastMDB(Listener l, String path, int repDegree) throws IOException{
+		this.l = l;
+		this.m = l.m;
+		id = l.id;
+		address = l.address;
 		vrs = m.getVersion();
-		data = m.getData();
+		data = l.data;
+		
 		this.path = path;
 		this.repDegree = repDegree;
-		try{
-			data.joinGroup(address);
-		}
-		catch(IOException e){
-			
-		}
 	}
-	
-	private void listener(){
-		try{
-	    	while(true){
-	    		byte[] buff = new byte[BackupFile.maxSize + 1000]; //1kbytes pro header idk
-	    		DatagramPacket packet = new DatagramPacket(buff,buff.length);
-				System.out.println("receiving");
-				data.receive(packet);
-				new Thread(new Runnable() {
-				     public void run() {
-				    	 String request = new String(packet.getData(), 0, packet.getLength());
-						 BackupProtocol bp = new BackupProtocol(request);
-						 if(bp.state == 0 /*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
-							bp.storeChunk("" + m.getFolderIndex(bp.fileID));
-							bp.state = 1;
-							System.out.println(bp.storeAnswer());
-							//new MulticastMC(m).start();
-						}
-				     }
-				}).start();
-	    	}
-				
-		}catch (IOException e){
-			System.err.println("oi");
-		}
-	}
+
 	
 	private void readFile(){
 		int partCounter = 0;
@@ -122,7 +109,6 @@ public class MulticastMDB extends Thread{
 	}
 	
 	public void run(){
-		if(path == null) listener();
-		else readFile();
+		readFile();
 	}
 }
