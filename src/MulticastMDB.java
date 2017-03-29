@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.security.MessageDigest;
+import java.util.Arrays;
 
 public class MulticastMDB extends Thread{
 	private MulticastSocket data;
@@ -32,8 +33,7 @@ public class MulticastMDB extends Thread{
 		
 		new Thread(new Runnable() {
 		     public void run() {
-		    	 String request = new String(packet.getData(), 0, packet.getLength());
-				 BackupProtocol bp = new BackupProtocol(request);
+				 BackupProtocol bp = new BackupProtocol(packet.getData(), packet.getLength());
 				 if(bp.state == 0 /*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
 					bp.storeChunk("" + m.getFolderIndex(bp.fileID));
 					bp.state = 1;
@@ -65,7 +65,7 @@ public class MulticastMDB extends Thread{
 			System.out.println("Oh meu ganda burro, " + path + " não existe!");
 			return;
 		}
-		String hashname = "Testezinho";
+		String hashname = "";
 		try {
    		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
 	    	 md.update(path.getBytes("UTF-16"));
@@ -79,8 +79,9 @@ public class MulticastMDB extends Thread{
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
 			int readValue = 0;
 			while ((readValue = bis.read(buffer)) > 0) {
+				byte[] message = Arrays.copyOfRange(buffer, 0, readValue);
 				for(int i = 0; i < repDegree; i++)
-					sendChunk(hashname,++partCounter, buffer, readValue); //TODO falta por o timer
+					sendChunk(hashname,++partCounter, message, readValue); //TODO falta por o timer
 			}
 			if(file.length()%BackupFile.maxSize == 0){
 				for(int i = 0; i < repDegree; i++)
@@ -95,7 +96,7 @@ public class MulticastMDB extends Thread{
 		new Thread(new Runnable() { //ñ sei se vale a pena ter isto como thread
 		     public void run() {
 		    	 BackupProtocol bp = new BackupProtocol(vrs,id,fileID,n,repDegree,buffer,size);
-		    	 byte[] buff = bp.request().getBytes();
+		    	 byte[] buff = bp.request();
 		    	 DatagramPacket packet = new DatagramPacket(buff,buff.length, address, data.getLocalPort());
 		    	 try {
 					data.send(packet);

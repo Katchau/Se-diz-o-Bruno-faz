@@ -1,3 +1,4 @@
+import java.util.Arrays;
 
 public class Protocol {
 	public int version;
@@ -8,21 +9,31 @@ public class Protocol {
 	public String subprotocol;
 	public int repDegree;
 	protected String header;
-	protected String body;
+	protected byte[] body;
 	
-	public Protocol(String message){
-		String[] headerbody = message.split(MulticastServer.CRLF + MulticastServer.CRLF);
-		if(headerbody[0].equals(message)){
+	public Protocol(byte[] message, int messageLength){
+		int i;
+		for(i = 3; i < message.length; i++){
+			if(message[i-3]==0xD && message[i-2]==0xA && message[i-1]==0xD && message[i]==0xA)
+				break;
+		}
+		
+		byte[] header = Arrays.copyOfRange(message, 0, i);
+		byte[] body = Arrays.copyOfRange(message, i+1, messageLength);
+		
+		if(header.equals(message)){
 			state = -1;
 			System.out.println("Error: Message damaged!");
 			System.out.println("Message received: " + message);
 			return;
 		}
-		System.out.println(headerbody[0]);
-		getHeader(headerbody[0]);
-		header = headerbody[0];
-		if(headerbody.length == 2){
-			body = headerbody[1];
+		
+		String headerString = new String(header);
+		System.out.println(headerString);
+		getHeader(headerString);
+		this.header = headerString;
+		if(body != null){
+			this.body = body;
 		}
 	}
 	

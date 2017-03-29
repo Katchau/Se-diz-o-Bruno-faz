@@ -1,6 +1,7 @@
 import java.io.File;
 //import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class BackupProtocol extends Protocol{
@@ -21,8 +22,8 @@ public class BackupProtocol extends Protocol{
 		this.sizeFile = size;
 	}
 	
-	public BackupProtocol(String message){
-		super(message);
+	public BackupProtocol(byte[] message, int messageLength){
+		super(message, messageLength);
 		
 		switch(subprotocol){
 			case msgTypeSend:
@@ -43,7 +44,7 @@ public class BackupProtocol extends Protocol{
 		}
 		
 		if(body != null){
-			chunk = body.getBytes();
+			chunk = body;
 		}
 		else if(state == 0 && body == null){
 			chunk = "".getBytes();
@@ -62,8 +63,17 @@ public class BackupProtocol extends Protocol{
 		
 	}
 	
-	public String request(){
-		return request(msgTypeSend) + new String(chunk, 0, sizeFile);
+	public byte[] request(){
+		byte[] header = request(msgTypeSend).getBytes();
+		byte[] request = new byte[header.length + chunk.length];
+
+	    System.arraycopy(header, 0, request, 0, header.length);
+	    System.arraycopy(chunk, 0, request, header.length, chunk.length);
+	    
+	    String test = new String(request);
+	    System.out.println(test);
+
+	    return request;
 	}
 	
 	public String storeAnswer(){
