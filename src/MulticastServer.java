@@ -23,6 +23,20 @@ public class MulticastServer{
 	public static final String CRLF = "\r\n";
 	public ArrayList<String> fileB;
 	
+	public MulticastServer(String args[]) throws IOException{
+		this.version = (int)Double.parseDouble(args[0]);
+		id = Integer.parseInt(args[1]);
+		//cena pro client é o args[2];
+		MCdata = new MulticastSocket(Integer.parseInt(args[4]));
+		MCaddress = InetAddress.getByName(args[3]);
+		MDBdata = new MulticastSocket(Integer.parseInt(args[6]));
+		MDBaddress = InetAddress.getByName(args[5]);
+		MDRdata = new MulticastSocket(Integer.parseInt(args[8]));
+		MDRaddress = InetAddress.getByName(args[7]);
+		loadFileStorage();
+		new Listener("MDB",this).start();
+	}
+	
 	public int getVersion() {
 		return version;
 	}
@@ -82,7 +96,7 @@ public class MulticastServer{
 		File f = new File("backup.txt");
 		try (FileOutputStream out = new FileOutputStream(f,true)) {
 			byte[] buffer = ("\r\n" + fileID).getBytes();
-			out.write(buffer, 0, buffer.length);//tmp is chunk size
+			out.write(buffer, 0, buffer.length);
 		}
 		catch(IOException e){
 			System.err.println("Error: Saving metadata");
@@ -96,20 +110,6 @@ public class MulticastServer{
 			storeNewFile(fileID);
 		}
 		return ret;
-	}
-	
-	public MulticastServer(String args[]) throws IOException{
-		this.version = (int)Double.parseDouble(args[0]);
-		id = Integer.parseInt(args[1]);
-		MCdata = new MulticastSocket(Integer.parseInt(args[4]));
-		MCaddress = InetAddress.getByName(args[3]);
-		MDBdata = new MulticastSocket(Integer.parseInt(args[6]));
-		MDBaddress = InetAddress.getByName(args[5]);
-		MDRdata = new MulticastSocket(Integer.parseInt(args[8]));
-		MDRaddress = InetAddress.getByName(args[7]);
-		loadFileStorage();
-		new Listener("MDB",this).start();
-//		new MulticastMDB(this).start();
 	}
 	
 	public void clientTest() throws IOException{
