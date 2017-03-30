@@ -10,6 +10,10 @@ import java.net.MulticastSocket;
 import java.util.ArrayList;
 //import java.util.HashMap;
 import java.util.Arrays;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
 public class MulticastServer{
 	private MulticastSocket MCdata;
@@ -20,13 +24,14 @@ public class MulticastServer{
 	private InetAddress MDRaddress;
 	private int version;
 	private int id;
+	private int peer_ap;
 	public static final String CRLF = "\r\n";
 	public ArrayList<String> fileB;
 	
 	public MulticastServer(String args[]) throws IOException{
 		this.version = (int)Double.parseDouble(args[0]);
 		id = Integer.parseInt(args[1]);
-		//cena pro client é o args[2];
+		peer_ap = Integer.parseInt(args[2]);
 		MCdata = new MulticastSocket(Integer.parseInt(args[4]));
 		MCaddress = InetAddress.getByName(args[3]);
 		MDBdata = new MulticastSocket(Integer.parseInt(args[6]));
@@ -34,7 +39,23 @@ public class MulticastServer{
 		MDRdata = new MulticastSocket(Integer.parseInt(args[8]));
 		MDRaddress = InetAddress.getByName(args[7]);
 		loadFileStorage();
+		RMIServer();
 		new Listener("MDB",this).start();
+	}
+	
+	public void RMIServer(){
+		new Thread(new Runnable(){
+			public void run(){
+				try {
+				    java.rmi.registry.LocateRegistry.createRegistry(peer_ap);
+				    System.out.println("RMI registry ready.");
+				} catch (Exception e) {
+				    System.out.println("Exception starting RMI registry:");
+				    e.printStackTrace();
+				}
+				RMIServer mc = new RMIServer(); 
+			}
+		}).start();
 	}
 	
 	public int getVersion() {

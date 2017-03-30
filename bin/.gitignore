@@ -12,3 +12,8 @@
 /Protocol.class
 /Listener.class
 /Listener$1.class
+/Client.class
+/CientInterface.class
+/ClientInterface.class
+/RMIServer.class
+/MulticastServer$1.class
