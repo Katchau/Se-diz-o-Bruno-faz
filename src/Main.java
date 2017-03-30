@@ -35,7 +35,7 @@ public class Main {
 			}
 		}
 		catch(IOException e){
-			System.out.println("fodeu xp");
+			System.err.println("fodeu xp");
 		}
 	}
 }

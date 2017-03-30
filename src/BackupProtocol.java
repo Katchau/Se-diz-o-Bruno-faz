@@ -1,17 +1,16 @@
 import java.io.File;
 //import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.Random;
 
 public class BackupProtocol extends Protocol{
 	
 	//header <MessageType> <Version> <SenderID> <FileID> <ChunkNo> <ReplicationDeg> <CRLF>
-	public final String msgTypeSend = "PUTCHUNK";//enviar ficheiro
-	public final String msgTypeStored = "STORED"; //STORED <Version> <SenderID> <FileID> <ChunkNo> <CRLF> <CRLF>
+	public static final String msgTypeSend = "PUTCHUNK";//enviar ficheiro
+	public static final String msgTypeStored = "STORED"; //STORED <Version> <SenderID> <FileID> <ChunkNo> <CRLF> <CRLF>
 	public static final int MAXDELAY = 400;
 	public static final int TRIES = 5;
-	public int delay; //ms
+	public int delay = 0; //ms
 	public byte[] chunk;
 	public int sizeFile;
 	
@@ -28,6 +27,8 @@ public class BackupProtocol extends Protocol{
 		switch(subprotocol){
 			case msgTypeSend:
 				state = 0;
+				Random r = new Random();
+				delay = r.nextInt(MAXDELAY);
 				break;
 			case msgTypeStored:
 				state = 1;
@@ -44,7 +45,7 @@ public class BackupProtocol extends Protocol{
 		}
 		
 		if(body != null){
-			chunk = body;
+			chunk = body; //dude what dorgas?
 		}
 		else if(state == 0 && body == null){
 			chunk = "".getBytes();
@@ -66,21 +67,13 @@ public class BackupProtocol extends Protocol{
 	public byte[] request(){
 		byte[] header = request(msgTypeSend).getBytes();
 		byte[] request = new byte[header.length + chunk.length];
-
 	    System.arraycopy(header, 0, request, 0, header.length);
 	    System.arraycopy(chunk, 0, request, header.length, chunk.length);
-	    
-	    String test = new String(request);
-	    System.out.println(test);
-
 	    return request;
 	}
 	
-	public String storeAnswer(){
-		Random r = new Random();
-		delay = r.nextInt(MAXDELAY);
-//		sleep((long)1000);???
-		return answer(msgTypeStored);
+	public byte[] storeAnswer(){
+		return answer(msgTypeStored).getBytes();
 	}
 
 }

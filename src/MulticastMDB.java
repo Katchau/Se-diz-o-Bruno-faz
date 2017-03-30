@@ -1,13 +1,12 @@
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
@@ -30,16 +29,28 @@ public class MulticastMDB extends Thread{
 		vrs = m.getVersion();
 		data = l.data;
 		this.packet = packet;
-		
+		createResponse();
+	}
+	
+	private void createResponse(){
 		new Thread(new Runnable() {
 		     public void run() {
 				 BackupProtocol bp = new BackupProtocol(packet.getData(), packet.getLength());
-				 if(bp.state == 0 /*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
-					bp.storeChunk("" + m.getFolderIndex(bp.fileID));
-					bp.state = 1;
-					System.out.println(bp.storeAnswer());
-					//new MulticastMC(m).start();
+				 if(bp.state == 0 && bp.version == vrs/*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
+					try {
+						sleep((long)bp.delay);
+						bp.storeChunk("" + m.getFolderIndex(bp.fileID));
+						bp.state = 1;
+						bp.id = id;
+						new MulticastMC(l,bp.storeAnswer());
+					} catch (IOException e) {
+						System.err.println("Error: Sending Store chunk");
+					} catch (InterruptedException e) {
+						System.err.println("Error: Sleep was interrupted 4some reason");
+					}
+					
 				}
+				//TODO para ter outras versões colocar aqi
 		     }
 		}).start();
 	}
@@ -56,6 +67,18 @@ public class MulticastMDB extends Thread{
 		this.repDegree = repDegree;
 	}
 
+	private String createHash(File file){
+		try {
+  		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
+	    	 md.update(path.getBytes("UTF-16"));
+	    	 md.update(Integer.toString((int)file.length()).getBytes());
+	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
+	    	 return new String(md.digest());
+		} catch (Exception e1) {
+			System.err.println("this shouldn't happen");
+			return "";
+		}
+	}
 	
 	private void readFile(){
 		int partCounter = 0;
@@ -65,16 +88,8 @@ public class MulticastMDB extends Thread{
 			System.out.println("Oh meu ganda burro, " + path + " não existe!");
 			return;
 		}
-		String hashname = "";
-		try {
-   		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
-	    	 md.update(path.getBytes("UTF-16"));
-	    	 md.update(Integer.toString((int)file.length()).getBytes());
-	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
-	    	 hashname = new String(md.digest());
-		} catch (Exception e1) {
-			System.err.println("this shouldn't happen");
-		}
+		String hashname = createHash(file);
+		if(hashname.equals(""))return;
 		
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
 			int readValue = 0;
@@ -92,6 +107,33 @@ public class MulticastMDB extends Thread{
 		}
 	}
 	
+	private boolean gotSaveChunk(int n) throws IOException{
+		int time_out = 1000; //hardcoded mudar dp >:D
+		MulticastSocket dataMC = new MulticastSocket(m.getMCdata().getLocalPort());
+		dataMC.joinGroup(m.getMCaddress());
+		boolean received = false;
+		int nTries = 1;
+		do{
+			byte[] buffer = new byte[BackupFile.maxSize + 1000];
+			DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
+			dataMC.setSoTimeout(time_out);
+			try {
+				dataMC.receive(packet);
+				received = true;
+				System.out.println("Packet: " + new String(packet.getData()));
+			} catch (SocketTimeoutException e) {
+				System.out.println("Attempt nº " + nTries);
+				nTries++;
+				time_out*=2;
+			}
+			catch (IOException e) {
+				System.err.println("Error: During reception of savechunk");
+			}
+		}while(!received && nTries < 6);
+		dataMC.close();
+		return received;
+	}
+	
 	public void sendChunk(String fileID, int n, byte[] buffer, int size){
 		new Thread(new Runnable() { //ñ sei se vale a pena ter isto como thread
 		     public void run() {
@@ -101,6 +143,7 @@ public class MulticastMDB extends Thread{
 		    	 try {
 					data.send(packet);
 					System.out.println("Sent!");
+					gotSaveChunk(n);
 					//TODO invocar um novo mc ride pra ouvir a resposta <(*.*<)
 				} catch (IOException e) {
 					System.err.println("Error: Fail sending chunk");
