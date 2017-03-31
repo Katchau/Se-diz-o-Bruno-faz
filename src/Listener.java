@@ -68,7 +68,7 @@ public class Listener extends Thread {
 				data.receive(packet);
 				switch(protocol){
 					case "MC":
-//						new MulticastMC();
+						new MulticastMC(this, packet);
 						break;
 					case "MDB":
 						new MulticastMDB(this, packet);
