@@ -39,11 +39,11 @@ public class MulticastServer{
 		MDRdata = new MulticastSocket(Integer.parseInt(args[8]));
 		MDRaddress = InetAddress.getByName(args[7]);
 		loadFileStorage();
-		RMIServer();
+		RMIServer(this);
 		new Listener("MDB",this).start();
 	}
 	
-	public void RMIServer(){
+	public void RMIServer(MulticastServer ms){
 		new Thread(new Runnable(){
 			public void run(){
 				try {
@@ -53,7 +53,7 @@ public class MulticastServer{
 				    System.out.println("Exception starting RMI registry:");
 				    e.printStackTrace();
 				}
-				RMIServer mc = new RMIServer(); 
+				RMIServer mc = new RMIServer(ms); 
 			}
 		}).start();
 	}
@@ -131,10 +131,6 @@ public class MulticastServer{
 			storeNewFile(fileID);
 		}
 		return ret;
-	}
-	
-	public void clientTest() throws IOException{
-		new Listener("MDB",this,"cebas.txt",1);
 	}
 	
 //	public void clientTest() throws IOException{

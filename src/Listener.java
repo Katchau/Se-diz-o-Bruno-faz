@@ -31,15 +31,6 @@ public class Listener extends Thread {
 		this.path = path;
 		this.repDegree = repDegree;
 		//TODO adicionar depois opções para o client
-		testClient();
-	}
-	
-	public void testClient(){
-		try {
-			new MulticastMDB(this,path,repDegree).start();
-		} catch (IOException e) {
-			System.err.println("Error: Starting client mdb");
-		}
 	}
 	
 	public void getIPandPort(){

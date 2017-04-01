@@ -17,7 +17,7 @@ public class MulticastMDB extends Thread{
 	private int vrs; //version xpto
 	private Listener l;
 	private MulticastServer m;
-	private String path = null;
+	private byte[] chunk = null;
 	private int repDegree;
 	private DatagramPacket packet;
 	
@@ -55,58 +55,16 @@ public class MulticastMDB extends Thread{
 		}).start();
 	}
 	
-	public MulticastMDB(Listener l, String path, int repDegree) throws IOException{
-		this.l = l;
-		this.m = l.m;
-		id = l.id;
-		address = l.address;
+	public MulticastMDB(MulticastServer m, int repDegree) throws IOException{
+		this.m = m;
+		id = m.getId();
+		address = m.getMDBaddress();
 		vrs = m.getVersion();
-		data = l.data;
+		data = m.getMDBdata();
 		
-		this.path = path;
 		this.repDegree = repDegree;
 	}
 
-	private String createHash(File file){
-		try {
-  		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
-	    	 md.update(path.getBytes("UTF-16"));
-	    	 md.update(Integer.toString((int)file.length()).getBytes());
-	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
-	    	 return new String(md.digest());
-		} catch (Exception e1) {
-			System.err.println("this shouldn't happen");
-			return "";
-		}
-	}
-	
-	private void readFile(){
-		int partCounter = 0;
-		byte[] buffer = new byte[BackupFile.maxSize];
-		File file = new File(path);
-		if(!file.exists()){
-			System.out.println("Oh meu ganda burro, " + path + " não existe!");
-			return;
-		}
-		String hashname = createHash(file);
-		if(hashname.equals(""))return;
-		
-		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-			int readValue = 0;
-			while ((readValue = bis.read(buffer)) > 0) {
-				byte[] message = Arrays.copyOfRange(buffer, 0, readValue);
-				for(int i = 0; i < repDegree; i++)
-					sendChunk(hashname,++partCounter, message, readValue); //TODO falta por o timer
-			}
-			if(file.length()%BackupFile.maxSize == 0){
-				for(int i = 0; i < repDegree; i++)
-					sendChunk(hashname,++partCounter, "".getBytes(),0);
-			}
-		}catch(IOException e){
-			System.err.println("Ups i did it again");
-		}
-	}
-	
 	private boolean gotSaveChunk(int n) throws IOException{
 		int time_out = 1000; //hardcoded mudar dp >:D
 		MulticastSocket dataMC = new MulticastSocket(m.getMCdata().getLocalPort());
@@ -153,6 +111,5 @@ public class MulticastMDB extends Thread{
 	}
 	
 	public void run(){
-		readFile();
 	}
 }

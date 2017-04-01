@@ -26,13 +26,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		try{
-			MulticastServer try1 = new MulticastServer(args);
-			Scanner scani = new Scanner(System.in);
-			String banana = scani.nextLine();
-			scani.close();
-			if(banana.equals("banana")){
-				try1.clientTest();
-			}
+			new MulticastServer(args);
 		}
 		catch(IOException e){
 			System.err.println("fodeu xp");
