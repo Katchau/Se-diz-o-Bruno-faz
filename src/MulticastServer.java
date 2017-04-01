@@ -10,10 +10,6 @@ import java.net.MulticastSocket;
 import java.util.ArrayList;
 //import java.util.HashMap;
 import java.util.Arrays;
-import java.rmi.registry.Registry;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 
 public class MulticastServer{
 	private MulticastSocket MCdata;
@@ -53,7 +49,7 @@ public class MulticastServer{
 				    System.out.println("Exception starting RMI registry:");
 				    e.printStackTrace();
 				}
-				RMIServer mc = new RMIServer(ms); 
+				new RMIServer(ms); 
 			}
 		}).start();
 	}
