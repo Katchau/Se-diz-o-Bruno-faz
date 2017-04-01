@@ -43,6 +43,12 @@ public class Protocol {
 		this.repDegree = repDegree;
 	}
 	
+	public Protocol(int version,int senderID, String fileID){
+		this.version = version;
+		this.id = senderID;
+		this.fileID = fileID;
+	}
+	
 	public void getHeader(String message){
 		String[] parts = message.split(" ");
 		subprotocol = parts[0];
@@ -54,9 +60,10 @@ public class Protocol {
 	}
 	
 	public String answer(String subprotocol){
-		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + MulticastServer.CRLF + MulticastServer.CRLF;
+		return subprotocol + " " + version + " " + id + " " + fileID + " " + MulticastServer.CRLF + MulticastServer.CRLF;
 	}
 	
+	//TODO mudar este se for preciso
 	public String request(String subprotocol){
 		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + repDegree + " " + MulticastServer.CRLF + MulticastServer.CRLF;
 	}

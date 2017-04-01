@@ -75,5 +75,13 @@ public class BackupProtocol extends Protocol{
 	public byte[] storeAnswer(){
 		return answer(msgTypeStored).getBytes();
 	}
+	
+	public String answer(String subprotocol){
+		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + MulticastServer.CRLF + MulticastServer.CRLF;
+	}
+	
+	public String request(String subprotocol){
+		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + repDegree + " " + MulticastServer.CRLF + MulticastServer.CRLF;
+	}
 
 }

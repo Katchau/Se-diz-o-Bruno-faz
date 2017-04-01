@@ -23,6 +23,16 @@ public class MulticastMC extends Thread{
 		createResponse();
 	}
 	
+	public MulticastMC(MulticastServer m, String protocol, String fileID) throws IOException{
+		this.m = m;
+		id = m.getId();
+		address = m.getMCaddress();
+		vrs = m.getVersion();
+		data = m.getMCdata();
+		byte []buffer = new Protocol(vrs,id,fileID).answer(protocol).getBytes();
+		data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
+	}
+	
 	public MulticastMC(Listener l, byte[] buffer) throws IOException{
 		this.l = l;
 		this.m = l.m;
@@ -34,15 +44,21 @@ public class MulticastMC extends Thread{
 		data.send(packet);
 		System.out.println("Sent SAVECHUNK");
 	}
-		
+	
 	private void createResponse(){
 		new Thread(new Runnable() {
 		     public void run() {
 				 Protocol p = new Protocol(packet.getData(), packet.getLength());
+				 if(p.id == id && p.version != vrs) return;
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
 				 		p = new BackupProtocol(packet.getData(),packet.getLength());
-				 		System.out.println("Cenas");
+				 		//TODO fazer o cenas para o repdegree
+				 		break;
+				 	case DeleteProtocol.msgDelete:
+				 		int indice = m.fileB.indexOf(p.fileID);
+				 		if(indice != -1)
+				 			p = new DeleteProtocol(packet.getData(),packet.getLength(),""+ indice);
 				 		break;
 				 	default:
 				 		System.err.println("Error: Unrecognized Message received in MC");
@@ -51,18 +67,6 @@ public class MulticastMC extends Thread{
 		     }
 		}).start();
 	}
-	
-//	public MulticastMDB(Listener l, String path, int repDegree) throws IOException{
-//		this.l = l;
-//		this.m = l.m;
-//		id = l.id;
-//		address = l.address;
-//		vrs = m.getVersion();
-//		data = l.data;
-//		
-//		this.path = path;
-//		this.repDegree = repDegree;
-//	}
 	
 	public void run(){
 //		readFile();
