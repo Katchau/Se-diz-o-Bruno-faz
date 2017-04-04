@@ -88,7 +88,7 @@ public class MulticastServer{
 	}
 
 	public void loadFileStorage(){
-		File f = new File("backup.txt");
+		File f = new File(id + "/backup.txt");
 		String files = "";
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f))) {
 			byte[] buffer = new byte[1024];
@@ -100,19 +100,25 @@ public class MulticastServer{
 			fileB = new ArrayList<String>(Arrays.asList(separate));
 		}
 		catch(IOException e){
-			System.err.println("Error: No backup file!");
+			System.err.println("Error: No backup file! Creating now...");
+			File folder = new File("" + id);
+			folder.mkdir();
+			f = new File(folder, "backup.txt");
+			try {
+				f.createNewFile();
+			} catch (IOException e1) {
+			}
 			fileB = new ArrayList<String>();
-			//TODO criar ficheiro backup??
 		}
 	}
 	
 	public void storeNewFile(String fileID){
 		String fName = Integer.toString(fileB.size());
 		fileB.add(fileID);
-		new File(fName).mkdir();
-		File f = new File("backup.txt");
+		new File(id + "/" + fName).mkdir();
+		File f = new File(id + "/backup.txt");
 		try (FileOutputStream out = new FileOutputStream(f,true)) {
-			byte[] buffer = ("\r\n" + fileID).getBytes();
+			byte[] buffer = (fileID + "\r\n").getBytes();
 			out.write(buffer, 0, buffer.length);
 		}
 		catch(IOException e){
