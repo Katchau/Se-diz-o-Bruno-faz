@@ -49,7 +49,7 @@ public class MulticastServer{
 				    System.out.println("Exception starting RMI registry:");
 				    e.printStackTrace();
 				}
-				new RMIServer(ms); 
+				new RMIServer(ms,peer_ap); 
 			}
 		}).start();
 	}

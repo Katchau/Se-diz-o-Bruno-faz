@@ -7,13 +7,13 @@ public class RMIServer implements ClientInterface {
 	
 	private MulticastServer ms;
 	
-	public RMIServer(MulticastServer ms){
+	public RMIServer(MulticastServer ms, int peer_ap){
 		this.ms = ms;
 		try {
 			ClientInterface stub = (ClientInterface) UnicastRemoteObject.exportObject(this, 0); //:)
 
 			// Bind the remote object's stub in the registry
-			Registry registry = LocateRegistry.getRegistry(1009);
+			Registry registry = LocateRegistry.getRegistry(peer_ap);
 			registry.bind("ClientInterface", stub);
 
 			System.out.println("RMI Server ready");

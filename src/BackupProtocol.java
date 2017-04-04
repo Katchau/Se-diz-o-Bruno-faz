@@ -52,16 +52,18 @@ public class BackupProtocol extends Protocol{
 		}
 	}
 	
-	public void storeChunk(String folder){
+	public boolean storeChunk(String folder){
 		File newFile = new File(folder,String.format("%06d", chunkN));
+		if(newFile.exists()) return false;
 		try {
 			FileOutputStream out = new FileOutputStream(newFile);
 			out.write(chunk, 0, chunk.length);
 			out.close();
 		} catch (Exception e) {
 			System.err.println("Error: Write File");
+			return false;
 		}
-		
+		return true;
 	}
 	
 	public byte[] request(){
