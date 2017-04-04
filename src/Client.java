@@ -2,6 +2,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry; 
 import java.rmi.registry.Registry;
 import java.security.MessageDigest;
@@ -40,6 +41,9 @@ public class Client {
     	      case "DELETE":
     	    	  filePath = args[2];
     	    	  break;
+    	      case "STATE":
+    	    	  stub.getState();
+    	    	  break;
     	      }
       } catch (Exception e){ 
             System.err.println("Error: Client exception: " + e.toString()); 
@@ -56,6 +60,12 @@ public class Client {
 		}
 		String hashname = createHash(file);
 		if(hashname.equals(""))return;
+		
+        try {
+			stub.saveFileInfo(filePath, hashname, rep_degree);
+		} catch (RemoteException e1) {
+			System.err.println("Error:" + e1.getMessage());
+		}
 		
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
 			int readValue = 0;
