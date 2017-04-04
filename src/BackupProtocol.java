@@ -39,11 +39,6 @@ public class BackupProtocol extends Protocol{
 				return;
 		}
 		
-		if(new File(fileID,String.format("%06d", chunkN)).exists()){
-			state = -1;
-			return;
-		}
-		
 		if(body != null){
 			chunk = body; //dude what dorgas?
 		}

@@ -50,16 +50,18 @@ public class MulticastMC extends Thread{
 		     public void run() {
 				 Protocol p = new Protocol(packet.getData(), packet.getLength());
 				 if(p.id == id && p.version != vrs) return;
+				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
 				 		p = new BackupProtocol(packet.getData(),packet.getLength());
-				 		//TODO fazer o cenas para o repdegree
 				 		break;
 				 	case DeleteProtocol.msgDelete:
-				 		int indice = m.fileB.indexOf(p.fileID);
 				 		if(indice != -1)
 				 			p = new DeleteProtocol(packet.getData(),packet.getLength(),""+ indice);
 				 		break;
+				 	case RestoreProtocol.msgRestore:
+				 		if(indice != -1)
+				 			p = new RestoreProtocol(packet.getData(),packet.getLength());
 				 	default:
 				 		System.err.println("Error: Unrecognized Message received in MC");
 				 		return;

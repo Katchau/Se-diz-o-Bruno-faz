@@ -103,6 +103,7 @@ public class MulticastServer{
 			System.err.println("Error: No backup file! Creating now...");
 			File folder = new File("" + id);
 			folder.mkdir();
+			new File(folder,"files").mkdir();
 			f = new File(folder, "backup.txt");
 			try {
 				f.createNewFile();
