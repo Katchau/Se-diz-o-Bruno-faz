@@ -40,6 +40,7 @@ public class Client {
     	    	  break;
     	      case "DELETE":
     	    	  filePath = args[2];
+    	    	  stub.deleteFile(filePath);
     	    	  break;
     	      case "STATE":
     	    	  stub.getState();
@@ -62,7 +63,7 @@ public class Client {
 		if(hashname.equals(""))return;
 		
         try {
-			stub.saveFileInfo(filePath, hashname, rep_degree);
+			stub.saveFileInfo(filePath, hashname, rep_degree, file);
 		} catch (RemoteException e1) {
 			System.err.println("Error:" + e1.getMessage());
 		}
@@ -86,7 +87,7 @@ public class Client {
 	private static String createHash(File file){
 		try {
   		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
-	    	 md.update(filePath.getBytes("UTF-16"));
+	    	 md.update(filePath.getBytes("UTF-8"));
 	    	 md.update(Integer.toString((int)file.length()).getBytes());
 	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
 	    	 return new String(md.digest());

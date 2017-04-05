@@ -39,11 +39,51 @@ public class RMIServer implements ClientInterface {
 		}
 	}
 	
-	public void saveFileInfo(String path, String fileHash ,int rep_degree){
+	public void deleteFile(String fileID){
+		String folderPath = ms.getId() + "/files";
+		File folder = new File(folderPath);
+		String value = "";
+		for(File file: folder.listFiles()){
+			String name = file.getName();
+			String[] parts = name.split("_");
+			String realName = "";
+			for(int i = 0; i < parts.length - 1; i++){
+				realName += parts[i];
+			}
+			if (realName.equals(fileID)){
+			try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+				byte[] buffer = new byte[1024];
+				int readValue = 0;
+				while((readValue = bis.read(buffer)) > 0){
+					value += new String(buffer,0,readValue);
+				}
+				String[] separate = value.split("\r\n"); //separar por new lines
+				
+				System.out.println(separate[1]);
+				
+				try {
+					MulticastMC mdb = new MulticastMC(this.ms, DeleteProtocol.msgDelete, separate[1]);
+				} catch (IOException e) {
+					System.err.println("Error: Deleting File");
+				}
+				
+			} catch (FileNotFoundException e) {
+				System.err.println("Error, file not found: "+ e.getMessage());
+			} catch (IOException e) {
+				System.err.println("Error: "+ e.getMessage());
+			}
+		}
+		
+		
+		}
+	}
+	
+	public void saveFileInfo(String path, String fileHash ,int rep_degree, File file){
 		String[] filePath = path.split("/");
 		String fileID = filePath[filePath.length - 1];
 		String folderPath = ms.getId() + "/files";
-		File f = new File(folderPath, fileID);
+		String filename = fileID + "_" + file.lastModified();
+		File f = new File(folderPath, filename);
 		try (FileOutputStream out = new FileOutputStream(f,true)) {
 			byte[] buffer = (path + "\r\n" + fileHash + "\r\n" + rep_degree + "\r\n").getBytes();
 			out.write(buffer, 0, buffer.length);

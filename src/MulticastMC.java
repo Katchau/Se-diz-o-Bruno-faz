@@ -49,7 +49,7 @@ public class MulticastMC extends Thread{
 		new Thread(new Runnable() {
 		     public void run() {
 				 Protocol p = new Protocol(packet.getData(), packet.getLength());
-				 if(p.id == id && p.version != vrs) return;
+//				 if(p.id == id && p.version != vrs) return; TODO Remover comentario
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
@@ -57,7 +57,7 @@ public class MulticastMC extends Thread{
 				 		break;
 				 	case DeleteProtocol.msgDelete:
 				 		if(indice != -1)
-				 			p = new DeleteProtocol(packet.getData(),packet.getLength(),""+ indice);
+				 			p = new DeleteProtocol(packet.getData(),packet.getLength(),id + "/" + indice);
 				 		break;
 				 	case RestoreProtocol.msgRestore:
 				 		if(indice != -1)

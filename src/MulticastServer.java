@@ -37,6 +37,7 @@ public class MulticastServer{
 		loadFileStorage();
 		RMIServer(this);
 		new Listener("MDB",this).start();
+		new Listener("MC",this).start();
 	}
 	
 	public void RMIServer(MulticastServer ms){

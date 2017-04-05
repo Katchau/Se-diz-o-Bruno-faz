@@ -17,7 +17,7 @@ public class Protocol {
 			if(message[i-3]==0xD && message[i-2]==0xA && message[i-1]==0xD && message[i]==0xA)
 				break;
 		}
-		byte[] header = Arrays.copyOfRange(message, 0, i);
+		byte[] header = Arrays.copyOfRange(message, 0, i-3);
 		byte[] body = Arrays.copyOfRange(message, i+1, messageLength);
 		
 		if(header.equals(message)){
@@ -55,7 +55,8 @@ public class Protocol {
 		version = Integer.parseInt(parts[1]);
 		id = Integer.parseInt(parts[2]);
 		fileID = parts[3];
-		chunkN = Integer.parseInt(parts[4]);
+		if(parts.length == 5)
+			chunkN = Integer.parseInt(parts[4]);
 		if(parts.length == 6) repDegree = Integer.parseInt(parts[5]); //TODO ISTO
 	}
 	
