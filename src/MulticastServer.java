@@ -22,6 +22,7 @@ public class MulticastServer{
 	private int id;
 	private int peer_ap;
 	public static final String CRLF = "\r\n";
+	public static final String BKDIR = "/backup.txt";
 	public ArrayList<String> fileB;
 	
 	public MulticastServer(String args[]) throws IOException{
@@ -89,7 +90,7 @@ public class MulticastServer{
 	}
 
 	public void loadFileStorage(){
-		File f = new File(id + "/backup.txt");
+		File f = new File(id + BKDIR);
 		String files = "";
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f))) {
 			byte[] buffer = new byte[1024];
@@ -105,7 +106,7 @@ public class MulticastServer{
 			File folder = new File("" + id);
 			folder.mkdir();
 			new File(folder,"files").mkdir();
-			f = new File(folder, "backup.txt");
+			f = new File(folder, BKDIR);
 			try {
 				f.createNewFile();
 			} catch (IOException e1) {
@@ -118,13 +119,33 @@ public class MulticastServer{
 		String fName = Integer.toString(fileB.size());
 		fileB.add(fileID);
 		new File(id + "/" + fName).mkdir();
-		File f = new File(id + "/backup.txt");
+		File f = new File(id + BKDIR);
 		try (FileOutputStream out = new FileOutputStream(f,true)) {
 			byte[] buffer = (fileID + "\r\n").getBytes();
 			out.write(buffer, 0, buffer.length);
 		}
 		catch(IOException e){
 			System.err.println("Error: Saving metadata");
+		}
+	}
+	
+	public void deleteFile(String fileID){
+		fileB.remove(fileID);
+		File f = new File(id + BKDIR);
+		f.delete();
+		try {
+			f.createNewFile();
+		} catch (IOException e1) {
+			System.err.println("Error: Updating new backup file");
+		}
+		try (FileOutputStream out = new FileOutputStream(f,false)) {
+			for(String s : fileB){
+				byte[] buffer = (s + "\r\n").getBytes();
+				out.write(buffer, 0, buffer.length);
+			}
+		}
+		catch(IOException e){
+			System.err.println("Error: Updating backup file");
 		}
 	}
 	

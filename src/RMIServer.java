@@ -7,8 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class RMIServer implements ClientInterface {
 	
@@ -43,6 +41,7 @@ public class RMIServer implements ClientInterface {
 		String folderPath = ms.getId() + "/files";
 		File folder = new File(folderPath);
 		String value = "";
+		File f = null;
 		for(File file: folder.listFiles()){
 			String name = file.getName();
 			String[] parts = name.split("_");
@@ -57,12 +56,12 @@ public class RMIServer implements ClientInterface {
 				while((readValue = bis.read(buffer)) > 0){
 					value += new String(buffer,0,readValue);
 				}
-				String[] separate = value.split("\r\n"); //separar por new lines
-				
-				System.out.println(separate[1]);
-				
+				String[] separate = value.split("\r\n"); //separar por new lines??				
 				try {
-					MulticastMC mdb = new MulticastMC(this.ms, DeleteProtocol.msgDelete, separate[1]);
+					new MulticastMC(this.ms, DeleteProtocol.msgDelete, separate[1]);
+					f = file;
+					break;
+					
 				} catch (IOException e) {
 					System.err.println("Error: Deleting File");
 				}
@@ -73,7 +72,7 @@ public class RMIServer implements ClientInterface {
 				System.err.println("Error: "+ e.getMessage());
 			}
 		}
-		
+		if(f!=null)f.delete(); //TODO esta merda ñ funciona
 		
 		}
 	}

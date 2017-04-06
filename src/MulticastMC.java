@@ -57,7 +57,7 @@ public class MulticastMC extends Thread{
 				 		break;
 				 	case DeleteProtocol.msgDelete:
 				 		if(indice != -1)
-				 			p = new DeleteProtocol(packet.getData(),packet.getLength(),id + "/" + indice);
+				 				deleteFileServerInfo(indice, p.fileID);
 				 		break;
 				 	case RestoreProtocol.msgRestore:
 				 		if(indice != -1)
@@ -68,6 +68,11 @@ public class MulticastMC extends Thread{
 				 }
 		     }
 		}).start();
+	}
+	
+	public void deleteFileServerInfo(int indice, String fileID){
+		new DeleteProtocol(packet.getData(),packet.getLength(),id + "/" + indice);
+		m.deleteFile(fileID);
 	}
 	
 	public void run(){

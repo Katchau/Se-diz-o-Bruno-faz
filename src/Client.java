@@ -87,7 +87,7 @@ public class Client {
 	private static String createHash(File file){
 		try {
   		 	 MessageDigest md = MessageDigest.getInstance("SHA-256");
-	    	 md.update(filePath.getBytes("UTF-8"));
+	    	 md.update(filePath.getBytes("UTF-16"));
 	    	 md.update(Integer.toString((int)file.length()).getBytes());
 	    	 md.update(Integer.toString((int)file.lastModified()).getBytes());
 	    	 return new String(md.digest());

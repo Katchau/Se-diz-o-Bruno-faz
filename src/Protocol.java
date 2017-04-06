@@ -55,9 +55,8 @@ public class Protocol {
 		version = Integer.parseInt(parts[1]);
 		id = Integer.parseInt(parts[2]);
 		fileID = parts[3];
-		if(parts.length == 5)
-			chunkN = Integer.parseInt(parts[4]);
-		if(parts.length == 6) repDegree = Integer.parseInt(parts[5]); //TODO ISTO
+		if(parts.length >= 5) chunkN = Integer.parseInt(parts[4]);
+		if(parts.length >= 6) repDegree = Integer.parseInt(parts[5]); //TODO ISTO
 	}
 	
 	public String answer(String subprotocol){
