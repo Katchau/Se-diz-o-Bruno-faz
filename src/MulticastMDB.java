@@ -32,7 +32,8 @@ public class MulticastMDB extends Thread{
 				 if(bp.state == 0 && bp.version == vrs/*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
 					try {
 						sleep((long)bp.delay);
-						if(!bp.storeChunk(id + "/" + m.getFolderIndex(bp.fileID))) return;
+						m.getFolderIndex(bp.fileID);
+						if(!bp.storeChunk(id + "/" + bp.fileID)) return;
 						bp.state = 1;
 						bp.id = id;
 						new MulticastMC(l,bp.storeAnswer());

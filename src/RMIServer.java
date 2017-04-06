@@ -71,10 +71,10 @@ public class RMIServer implements ClientInterface {
 			} catch (IOException e) {
 				System.err.println("Error: "+ e.getMessage());
 			}
+			break;
 		}
-		if(f!=null)f.delete(); //TODO esta merda ñ funciona
-		
 		}
+		if(f!= null)f.delete();
 	}
 	
 	public void saveFileInfo(String path, String fileHash ,int rep_degree, File file){

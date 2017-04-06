@@ -55,7 +55,7 @@ public class BackupProtocol extends Protocol{
 			out.write(chunk, 0, chunk.length);
 			out.close();
 		} catch (Exception e) {
-			System.err.println("Error: Write File");
+			System.err.println("Error: Write File " + e.getMessage());
 			return false;
 		}
 		return true;

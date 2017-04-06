@@ -56,7 +56,7 @@ public class Protocol {
 		id = Integer.parseInt(parts[2]);
 		fileID = parts[3];
 		if(parts.length >= 5) chunkN = Integer.parseInt(parts[4]);
-		if(parts.length >= 6) repDegree = Integer.parseInt(parts[5]); //TODO ISTO
+		if(parts.length >= 6) repDegree = Integer.parseInt(parts[5]);
 	}
 	
 	public String answer(String subprotocol){

@@ -1,7 +1,4 @@
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 //import java.net.DatagramPacket;
 //import java.net.DatagramSocket;
@@ -9,7 +6,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
 //import java.util.HashMap;
-import java.util.Arrays;
 
 public class MulticastServer{
 	private MulticastSocket MCdata;
@@ -22,7 +18,7 @@ public class MulticastServer{
 	private int id;
 	private int peer_ap;
 	public static final String CRLF = "\r\n";
-	public static final String BKDIR = "/backup.txt";
+	public static final String FSTORE = "files";
 	public ArrayList<String> fileB;
 	
 	public MulticastServer(String args[]) throws IOException{
@@ -90,63 +86,25 @@ public class MulticastServer{
 	}
 
 	public void loadFileStorage(){
-		File f = new File(id + BKDIR);
-		String files = "";
-		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f))) {
-			byte[] buffer = new byte[1024];
-			int readValue = 0;
-			while((readValue = bis.read(buffer)) > 0){
-				files += new String(buffer,0,readValue);
-			}
-			String[] separate = files.split("\r\n"); //separar por new lines
-			fileB = new ArrayList<String>(Arrays.asList(separate));
-		}
-		catch(IOException e){
-			System.err.println("Error: No backup file! Creating now...");
-			File folder = new File("" + id);
+		File folder = new File("" + id);
+		fileB = new ArrayList<String>();
+		if(!folder.exists()){
 			folder.mkdir();
-			new File(folder,"files").mkdir();
-			f = new File(folder, BKDIR);
-			try {
-				f.createNewFile();
-			} catch (IOException e1) {
-			}
-			fileB = new ArrayList<String>();
+			new File(folder,FSTORE).mkdir();
+			return;
+		}
+		for(File f : folder.listFiles()){
+			if(!f.getName().equals(FSTORE))fileB.add(f.getName());
 		}
 	}
 	
 	public void storeNewFile(String fileID){
-		String fName = Integer.toString(fileB.size());
 		fileB.add(fileID);
-		new File(id + "/" + fName).mkdir();
-		File f = new File(id + BKDIR);
-		try (FileOutputStream out = new FileOutputStream(f,true)) {
-			byte[] buffer = (fileID + "\r\n").getBytes();
-			out.write(buffer, 0, buffer.length);
-		}
-		catch(IOException e){
-			System.err.println("Error: Saving metadata");
-		}
+		new File(id + "/" + fileID).mkdir();
 	}
 	
 	public void deleteFile(String fileID){
 		fileB.remove(fileID);
-		File f = new File(id + BKDIR);
-		f.delete();
-		try {
-			f.createNewFile();
-		} catch (IOException e1) {
-			System.err.println("Error: Updating new backup file");
-		}
-		try (FileOutputStream out = new FileOutputStream(f,false)) {
-			for(String s : fileB){
-				byte[] buffer = (s + "\r\n").getBytes();
-				out.write(buffer, 0, buffer.length);
-			}
-		}
-		catch(IOException e){
-			System.err.println("Error: Updating backup file");
-		}
 	}
 	
 	public int getFolderIndex(String fileID){
