@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.ArrayList;
 
 public class MulticastMC extends Thread{
 	private MulticastSocket data;
@@ -30,8 +31,12 @@ public class MulticastMC extends Thread{
 		vrs = m.getVersion();
 		data = m.getMCdata();
 		byte []buffer = new Protocol(vrs,id,fileID).answer(protocol).getBytes();
-		data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
+		if(protocol.equals(DeleteProtocol.msgDelete))
+			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
+		if(protocol.equals(RestoreProtocol.msgRestore))
+			restoreFile(fileID);
 	}
+	
 	
 	public MulticastMC(Listener l, byte[] buffer) throws IOException{
 		this.l = l;
@@ -68,6 +73,25 @@ public class MulticastMC extends Thread{
 				 }
 		     }
 		}).start();
+	}
+	
+	public void restoreFile(String fileID){
+		boolean moreChunks = true;
+		int nChunk = 1;
+		ArrayList<byte[]> kek = null;
+		do{
+			RestoreProtocol rp = new RestoreProtocol(vrs,id,fileID,nChunk);
+			byte[] buffer = rp.request();
+			DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
+			try {
+				data.send(packet);
+				MulticastMDR md = new MulticastMDR(l);
+				md.receiveChunk(fileID, nChunk);
+			} catch (IOException e) {
+				System.err.println("Error: Sendind Restore in MC");
+			}
+			nChunk++;
+		}while (moreChunks);
 	}
 	
 	public void deleteFileServerInfo(String fileID){

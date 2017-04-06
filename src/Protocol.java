@@ -65,6 +65,6 @@ public class Protocol {
 	
 	//TODO mudar este se for preciso
 	public String request(String subprotocol){
-		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + repDegree + " " + MulticastServer.CRLF + MulticastServer.CRLF;
+		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + MulticastServer.CRLF + MulticastServer.CRLF;
 	}
 }
