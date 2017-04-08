@@ -37,6 +37,7 @@ public class Client {
     	          break;
     	      case "RESTORE":
     	          filePath = args[2];
+    	          stub.restoreFile(filePath);
     	    	  break;
     	      case "DELETE":
     	    	  filePath = args[2];

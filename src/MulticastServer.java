@@ -20,8 +20,10 @@ public class MulticastServer{
 	public static final String CRLF = "\r\n";
 	public static final String FSTORE = "files";
 	public ArrayList<String> fileB;
+	public RestoreSynch rs;
 	
 	public MulticastServer(String args[]) throws IOException{
+		rs = new RestoreSynch();
 		this.version = (int)Double.parseDouble(args[0]);
 		id = Integer.parseInt(args[1]);
 		peer_ap = Integer.parseInt(args[2]);
@@ -35,6 +37,7 @@ public class MulticastServer{
 		RMIServer(this);
 		new Listener("MDB",this).start();
 		new Listener("MC",this).start();
+		new Listener("MDR",this).start();
 	}
 	
 	public void RMIServer(MulticastServer ms){

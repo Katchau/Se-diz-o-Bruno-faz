@@ -37,10 +37,11 @@ public class RMIServer implements ClientInterface {
 		}
 	}
 	
-	public void deleteFile(String fileID){
+	public String getHash(boolean delete,String fileID){
 		String folderPath = ms.getId() + "/files";
 		File folder = new File(folderPath);
 		String value = "";
+		String ret = "";
 		File f = null;
 		for(File file: folder.listFiles()){
 			String name = file.getName();
@@ -50,31 +51,46 @@ public class RMIServer implements ClientInterface {
 				realName += parts[i];
 			}
 			if (realName.equals(fileID)){
-			try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-				byte[] buffer = new byte[1024];
-				int readValue = 0;
-				while((readValue = bis.read(buffer)) > 0){
-					value += new String(buffer,0,readValue);
-				}
-				String[] separate = value.split("\r\n"); //separar por new lines??				
-				try {
-					new MulticastMC(this.ms, DeleteProtocol.msgDelete, separate[1]);
+				try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+					byte[] buffer = new byte[1024];
+					int readValue = 0;
+					while((readValue = bis.read(buffer)) > 0){
+						value += new String(buffer,0,readValue);
+					}
+					String[] separate = value.split("\r\n"); //separar por new lines??	
 					f = file;
+					ret = separate[1];
 					break;
-					
+				} catch (FileNotFoundException e) {
+					System.err.println("Error, file not found: "+ e.getMessage());
 				} catch (IOException e) {
-					System.err.println("Error: Deleting File");
+					System.err.println("Error: "+ e.getMessage());
 				}
-				
-			} catch (FileNotFoundException e) {
-				System.err.println("Error, file not found: "+ e.getMessage());
-			} catch (IOException e) {
-				System.err.println("Error: "+ e.getMessage());
+				break;
 			}
-			break;
 		}
+		if(delete)f.delete();
+		return ret;
+	}
+	
+	public void deleteFile(String fileID){
+		String hash = getHash(true,fileID);
+		if(hash.equals("")) return;
+		try {
+			new MulticastMC(this.ms, DeleteProtocol.msgDelete, hash);
+		} catch (IOException e) {
+			System.err.println("Error: Deleting File");
 		}
-		if(f!= null)f.delete();
+	}
+	
+	public void restoreFile(String fileID){
+		String hash = getHash(false,fileID);
+		if(hash.equals("")) return;
+		try {
+			new MulticastMC(this.ms, RestoreProtocol.msgRestore, hash);
+		} catch (IOException e) {
+			System.err.println("Error: Deleting File");
+		}
 	}
 	
 	public void saveFileInfo(String path, String fileHash ,int rep_degree, File file){

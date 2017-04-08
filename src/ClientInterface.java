@@ -7,4 +7,5 @@ public interface ClientInterface extends Remote{
 	void saveFileInfo(String path, String fileHash , int rep_degree, File file) throws RemoteException;
 	void getState() throws RemoteException;
 	void deleteFile(String fileID) throws RemoteException;
+	void restoreFile(String fileID) throws RemoteException;
 } 

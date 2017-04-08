@@ -65,7 +65,7 @@ public class Listener extends Thread {
 						new MulticastMDB(this, packet);
 						break;
 					case "MDR":
-//						new MulticastMDR();
+						new MulticastMDR(this, packet);
 						break;
 				}
 	    	}

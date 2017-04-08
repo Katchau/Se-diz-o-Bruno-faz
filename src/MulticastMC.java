@@ -58,17 +58,20 @@ public class MulticastMC extends Thread{
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
-				 		p = new BackupProtocol(packet.getData(),packet.getLength());
+				 		new BackupProtocol(packet.getData(),packet.getLength());
 				 		break;
 				 	case DeleteProtocol.msgDelete:
 				 		if(indice != -1)
-				 				deleteFileServerInfo(p.fileID);
+				 			deleteFileServerInfo(p.fileID);
 				 		break;
 				 	case RestoreProtocol.msgRestore:
-				 		if(indice != -1)
-				 			p = new RestoreProtocol(packet.getData(),packet.getLength());
+				 		if(indice != -1){
+				 			RestoreProtocol rp = new RestoreProtocol(packet.getData(),packet.getLength());
+				 			new MulticastMDR(l).sendChunk(rp);
+				 		}
+				 		break;
 				 	default:
-				 		System.err.println("Error: Unrecognized Message received in MC");
+				 		System.err.println("Error: Unrecognized Message received @MC " + p.subprotocol );
 				 		return;
 				 }
 		     }
@@ -76,22 +79,35 @@ public class MulticastMC extends Thread{
 	}
 	
 	public void restoreFile(String fileID){
-		boolean moreChunks = true;
-		int nChunk = 1;
-		ArrayList<byte[]> kek = null;
-		do{
-			RestoreProtocol rp = new RestoreProtocol(vrs,id,fileID,nChunk);
-			byte[] buffer = rp.request();
-			DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
-			try {
-				data.send(packet);
-				MulticastMDR md = new MulticastMDR(l);
-				md.receiveChunk(fileID, nChunk);
-			} catch (IOException e) {
-				System.err.println("Error: Sendind Restore in MC");
-			}
-			nChunk++;
-		}while (moreChunks);
+		new Thread(new Runnable() {
+		    public void run() {
+		        boolean moreChunks = true;
+		    	int nChunk = 1;
+		 		ArrayList<byte[]> chunks = new ArrayList<byte[]>();
+		 		do{
+		 			RestoreProtocol rp = new RestoreProtocol(vrs,id,fileID,nChunk);
+		 			byte[] buffer = rp.request();
+		 			DatagramPacket packet = new DatagramPacket(buffer,buffer.length,address,data.getLocalPort());
+		 			try {
+		 				data.send(packet);
+		 				System.out.println("Sending restore to MC");
+		 				m.rs.waitChunk(fileID, nChunk);
+		 				System.out.println("Restore: Reiceved chunk" + nChunk);
+		 				byte[] buff = m.rs.getData(fileID, nChunk);
+		 				chunks.add(buff);
+		 				m.rs.deleteChunk(fileID, nChunk);
+		 				if(buff.length != BackupFile.maxSize) moreChunks = false;
+		 			} catch (IOException e) {
+		 				System.err.println("Error: Sendind Restore in MC");
+		 			} catch (InterruptedException e){
+		 				System.err.println("Error: Interrupted Expception");
+		 			}
+		 			nChunk++;
+		 		}while (moreChunks);
+		 		System.out.println(new String(m.rs.restoredChunks.get(0).data));
+		 		//TODO fazer backup do ficheiro
+		     }
+		}).start();
 	}
 	
 	public void deleteFileServerInfo(String fileID){
