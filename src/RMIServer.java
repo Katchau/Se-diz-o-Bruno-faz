@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 
 public class RMIServer implements ClientInterface {
 	
@@ -83,14 +84,16 @@ public class RMIServer implements ClientInterface {
 		}
 	}
 	
-	public void restoreFile(String fileID){
+	public ArrayList<byte[]> restoreFile(String fileID){
 		String hash = getHash(false,fileID);
-		if(hash.equals("")) return;
+		ArrayList<byte[]> chunks = new ArrayList<byte[]>();
+		if(hash.equals("")) return chunks;
 		try {
-			new MulticastMC(this.ms, RestoreProtocol.msgRestore, hash);
+			chunks = new MulticastMC(this.ms, RestoreProtocol.msgRestore, hash).restoreFile(hash);
 		} catch (IOException e) {
 			System.err.println("Error: Deleting File");
 		}
+		return chunks;
 	}
 	
 	public void saveFileInfo(String path, String fileHash ,int rep_degree, File file){

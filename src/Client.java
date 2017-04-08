@@ -6,6 +6,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry; 
 import java.rmi.registry.Registry;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays; 
  
 public class Client { 
@@ -37,7 +38,7 @@ public class Client {
     	          break;
     	      case "RESTORE":
     	          filePath = args[2];
-    	          stub.restoreFile(filePath);
+    	          restoreFile(filePath);
     	    	  break;
     	      case "DELETE":
     	    	  filePath = args[2];
@@ -51,6 +52,11 @@ public class Client {
             System.err.println("Error: Client exception: " + e.toString()); 
       } 
     } 
+    
+    private static void restoreFile(String filePath) throws RemoteException{
+    	ArrayList<byte[]> chunks = stub.restoreFile(filePath);
+    	BackupFile.assembleFile(filePath, chunks);
+    }
     
 	private static void readFile(){
 		int partCounter = 0;

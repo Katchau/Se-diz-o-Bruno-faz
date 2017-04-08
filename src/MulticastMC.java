@@ -33,8 +33,8 @@ public class MulticastMC extends Thread{
 		byte []buffer = new Protocol(vrs,id,fileID).answer(protocol).getBytes();
 		if(protocol.equals(DeleteProtocol.msgDelete))
 			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
-		if(protocol.equals(RestoreProtocol.msgRestore))
-			restoreFile(fileID);
+//		if(protocol.equals(RestoreProtocol.msgRestore))
+//			restoreFile(fileID);
 	}
 	
 	
@@ -78,9 +78,8 @@ public class MulticastMC extends Thread{
 		}).start();
 	}
 	
-	public void restoreFile(String fileID){
-		new Thread(new Runnable() {
-		    public void run() {
+	public ArrayList<byte[]> restoreFile(String fileID){
+
 		        boolean moreChunks = true;
 		    	int nChunk = 1;
 		 		ArrayList<byte[]> chunks = new ArrayList<byte[]>();
@@ -104,10 +103,7 @@ public class MulticastMC extends Thread{
 		 			}
 		 			nChunk++;
 		 		}while (moreChunks);
-		 		System.out.println(new String(m.rs.restoredChunks.get(0).data));
-		 		//TODO fazer backup do ficheiro
-		     }
-		}).start();
+		 		return chunks;
 	}
 	
 	public void deleteFileServerInfo(String fileID){
