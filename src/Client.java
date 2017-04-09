@@ -8,7 +8,9 @@ import java.rmi.registry.Registry;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays; 
- 
+import rmi.*;
+import system.*;
+
 public class Client { 
   private static int peer_ap; 
   private static String sub_protocol; 

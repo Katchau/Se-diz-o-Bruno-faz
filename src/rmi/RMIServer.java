@@ -1,3 +1,7 @@
+package rmi;
+import channels.*;
+import protocols.*;
+
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.io.BufferedInputStream;

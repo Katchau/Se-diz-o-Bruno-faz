@@ -1,3 +1,6 @@
+package channels;
+import rmi.*;
+import system.*;
 import java.io.File;
 import java.io.IOException;
 //import java.net.DatagramPacket;

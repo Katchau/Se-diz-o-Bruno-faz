@@ -1,3 +1,4 @@
+package protocols;
 import java.io.File;
 
 public class DeleteProtocol extends Protocol{
