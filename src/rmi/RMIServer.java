@@ -89,7 +89,8 @@ public class RMIServer implements ClientInterface {
 	}
 	
 	public void setMaxSize(String size){
-		ms.maxSize = Integer.parseInt(size);
+		int maxSize = Integer.parseInt(size);
+		ms.maxSize  = maxSize * 1000;
 		if(ms.currSize > ms.maxSize){
 			try {
 				new MulticastMC(this.ms,ReclaimProtocol.msgRemoved, "");

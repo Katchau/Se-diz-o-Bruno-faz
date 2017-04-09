@@ -52,6 +52,9 @@ public class Client {
     	      case "STATE":
     	    	  stub.getState();
     	    	  break;
+    	      default:
+    	    	  System.err.println("Error in sub-protocol");
+    	    	  break;
     	      }
       } catch (Exception e){ 
             System.err.println("Error: Client exception: " + e.toString()); 
