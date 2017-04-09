@@ -19,12 +19,16 @@ public class MulticastServer{
 	private int peer_ap;
 	public static final String CRLF = "\r\n";
 	public static final String FSTORE = "files";
+	public long maxSize; // -1 equals unrestricted
+	public long currSize;
 	public ArrayList<String> fileB;
 	public RestoreSynch rs;
 	
 	public MulticastServer(String args[]) throws IOException{
 		rs = new RestoreSynch();
 		this.version = (int)Double.parseDouble(args[0]);
+		maxSize = -1;
+		currSize = 0;
 		id = Integer.parseInt(args[1]);
 		peer_ap = Integer.parseInt(args[2]);
 		MCdata = new MulticastSocket(Integer.parseInt(args[4]));
@@ -97,8 +101,14 @@ public class MulticastServer{
 			return;
 		}
 		for(File f : folder.listFiles()){
-			if(!f.getName().equals(FSTORE))fileB.add(f.getName());
+			if(!f.getName().equals(FSTORE)){
+				fileB.add(f.getName());
+				for(File ff : f.listFiles()){
+					currSize += ff.length();
+				}
+			}
 		}
+		System.out.println("Space Occupied " + currSize );
 	}
 	
 	public void storeNewFile(String fileID){
@@ -118,22 +128,5 @@ public class MulticastServer{
 		}
 		return ret;
 	}
-	
-//	public void clientTest() throws IOException{
-//	      MulticastSocket umo = new MulticastSocket(data.getLocalPort());
-//	      
-//	      byte[] buff = new byte[256];
-//	      String antes = "lel";
-//	      buff = antes.getBytes();
-//	      
-//		  DatagramPacket pacote = new DatagramPacket(buff,buff.length, address, umo.getLocalPort());
-//	      
-//	      System.out.println("sending...");
-//	      umo.send(pacote);
-//	      
-//	      System.out.println("kek");
-//	      
-//	      
-//	}
 	
 }

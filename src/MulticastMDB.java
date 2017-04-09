@@ -29,13 +29,14 @@ public class MulticastMDB extends Thread{
 		new Thread(new Runnable() {
 		     public void run() {
 				 BackupProtocol bp = new BackupProtocol(packet.getData(), packet.getLength());
-				 if(bp.state == 0 && bp.version == vrs/*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
+				 if(bp.state == 0 && bp.version == vrs && ( m.maxSize == -1 || m.maxSize >= bp.chunk.length + m.currSize)/*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
 					try {
 						sleep((long)bp.delay);
 						m.getFolderIndex(bp.fileID);
 						if(!bp.storeChunk(id + "/" + bp.fileID)) return;
 						bp.state = 1;
 						bp.id = id;
+						m.currSize+= bp.chunk.length;
 						new MulticastMC(l,bp.storeAnswer());
 					} catch (IOException e) {
 						System.err.println("Error: Sending Store chunk");
@@ -43,6 +44,10 @@ public class MulticastMDB extends Thread{
 						System.err.println("Error: Sleep was interrupted 4some reason");
 					}
 					
+				}
+				else{
+					if(bp.state != 0)System.err.println("Error: Unrecognized Message received @MDB " + bp.subprotocol );
+					if(m.maxSize < bp.chunk.length + m.currSize) System.err.println("Error: Max Sized reached!");
 				}
 				//TODO para ter outras versões colocar aqi
 		     }
@@ -60,28 +65,31 @@ public class MulticastMDB extends Thread{
 	}
 
 	private boolean gotSaveChunk(int n) throws IOException{
-		int time_out = 1000; //hardcoded mudar dp >:D
 		MulticastSocket dataMC = new MulticastSocket(m.getMCdata().getLocalPort());
 		dataMC.joinGroup(m.getMCaddress());
 		boolean received = false;
-		int nTries = 1;
-		do{
-			byte[] buffer = new byte[BackupFile.maxSize + 1000];
-			DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
-			dataMC.setSoTimeout(time_out);
-			try {
-				dataMC.receive(packet);
-				received = true;
-				System.out.println("Packet: " + new String(packet.getData()));
-			} catch (SocketTimeoutException e) {
-				System.out.println("Attempt nº " + nTries);
-				nTries++;
-				time_out*=2;
-			}
-			catch (IOException e) {
-				System.err.println("Error: During reception of savechunk");
-			}
-		}while(!received && nTries < 6);
+		for(int i = 0; i < repDegree;i++){
+			int time_out = 1000;
+			received = false;
+			int nTries = 1;
+			do{
+				byte[] buffer = new byte[BackupFile.maxSize + 1000];
+				DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
+				dataMC.setSoTimeout(time_out);
+				try {
+					dataMC.receive(packet);
+					received = true;
+					System.out.println("Packet: " + new String(packet.getData()));
+				} catch (SocketTimeoutException e) {
+					System.out.println("Attempt nº " + nTries);
+					nTries++;
+					time_out*=2;
+				}
+				catch (IOException e) {
+					System.err.println("Error: During reception of savechunk");
+				}
+			}while(!received && nTries < 6);
+		}
 		dataMC.close();
 		return received;
 	}

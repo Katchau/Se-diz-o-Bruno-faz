@@ -44,6 +44,9 @@ public class Client {
     	    	  filePath = args[2];
     	    	  stub.deleteFile(filePath);
     	    	  break;
+    	      case "RECLAIM":
+    	    	  stub.setMaxSize(args[2]);
+    	    	  break;
     	      case "STATE":
     	    	  stub.getState();
     	    	  break;
@@ -79,8 +82,7 @@ public class Client {
 			int readValue = 0;
 			while ((readValue = bis.read(buffer)) > 0) {
 				byte[] message = Arrays.copyOfRange(buffer, 0, readValue);
-				for(int i = 0; i < rep_degree; i++)
-					stub.sendChunk(rep_degree, hashname,++partCounter, message, readValue); //TODO falta por o timer
+				stub.sendChunk(rep_degree, hashname,++partCounter, message, readValue);
 			}
 			if(file.length()%BackupFile.maxSize == 0){
 				for(int i = 0; i < rep_degree; i++)

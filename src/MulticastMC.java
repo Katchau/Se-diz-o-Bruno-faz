@@ -33,6 +33,8 @@ public class MulticastMC extends Thread{
 		byte []buffer = new Protocol(vrs,id,fileID).answer(protocol).getBytes();
 		if(protocol.equals(DeleteProtocol.msgDelete))
 			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
+		if(protocol.equals(ReclaimProtocol.msgRemoved))
+			deleteFiles();
 //		if(protocol.equals(RestoreProtocol.msgRestore))
 //			restoreFile(fileID);
 	}
@@ -67,8 +69,14 @@ public class MulticastMC extends Thread{
 				 	case RestoreProtocol.msgRestore:
 				 		if(indice != -1){
 				 			RestoreProtocol rp = new RestoreProtocol(packet.getData(),packet.getLength());
+				 			rp.id = id;
 				 			new MulticastMDR(l).sendChunk(rp);
 				 		}
+				 		break;
+				 	case ReclaimProtocol.msgRemoved:
+				 		//TODO fazer isto dp :)
+				 		System.out.println("Não me apetece fazer isto xp");
+				 		//TODO isto usa a pseudo melhoria do restore
 				 		break;
 				 	default:
 				 		System.err.println("Error: Unrecognized Message received @MC " + p.subprotocol );
@@ -106,8 +114,26 @@ public class MulticastMC extends Thread{
 		 		return chunks;
 	}
 	
+	public void deleteFiles() throws IOException{
+		//TODO apagar aqueles ficheiros no files
+		while(m.maxSize < m.currSize){
+			System.out.println("Current size "  + m.currSize);
+			String fileID =  m.fileB.get(0);
+			ReclaimProtocol rp = new ReclaimProtocol(vrs,id,fileID);
+			byte[] buffer = rp.request();
+			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
+			if(rp.removeChunk(id + "/" +fileID)){
+				m.deleteFile(fileID);
+			}
+			m.currSize-=rp.removedSize;
+		}
+		
+	}
+	
 	public void deleteFileServerInfo(String fileID){
-		new DeleteProtocol(packet.getData(),packet.getLength(),id + "/" + fileID);
+		DeleteProtocol dp = new DeleteProtocol(packet.getData(),packet.getLength(),id + "/" + fileID);
+		m.currSize -= dp.sizeDeleted;
+		if(m.currSize < 0)m.currSize = 0; 
 		m.deleteFile(fileID);
 	}
 	

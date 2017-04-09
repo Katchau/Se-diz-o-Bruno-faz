@@ -84,6 +84,18 @@ public class RMIServer implements ClientInterface {
 		}
 	}
 	
+	public void setMaxSize(String size){
+		ms.maxSize = Integer.parseInt(size);
+		if(ms.currSize > ms.maxSize){
+			try {
+				System.out.println("wtf");
+				new MulticastMC(this.ms,ReclaimProtocol.msgRemoved, "");
+			} catch (IOException e) {
+				System.err.println("Error: Creating Reclaim Protocol");
+			}
+		}
+	}
+	
 	public ArrayList<byte[]> restoreFile(String fileID){
 		String hash = getHash(false,fileID);
 		ArrayList<byte[]> chunks = new ArrayList<byte[]>();
