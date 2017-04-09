@@ -22,6 +22,18 @@ public class BackupSynch {
 		return false;
 	}
 	
+	public synchronized boolean invalidChunk(String fileID, int n){
+		ChunkInfo c = new ChunkInfo(fileID,n);
+		for(ChunkInfo ci : backupChunks){
+			if(ci.equals(c)){
+				notify();
+				return ci.repDeg == -1;
+			}
+		}
+		notify();
+		return true;
+	}
+	
 	public synchronized int checkDesiredRepDegree(String fileID, int n){
 		ChunkInfo c = new ChunkInfo(fileID,n);
 		for(ChunkInfo ci : backupChunks){
@@ -34,14 +46,6 @@ public class BackupSynch {
 		return 0;
 	}
 	
-	public synchronized boolean waitChunk2(String fileID, int nChunk, int timeout) throws InterruptedException{
-		while(!receivedChunk(fileID, nChunk)){
-			wait(timeout);
-		}
-		notify();
-		return receivedChunk(fileID,nChunk);
-	}
-	
 	public synchronized void waitChunk(String fileID, int nChunk) throws InterruptedException{
 		while(!receivedChunk(fileID, nChunk)){
 			wait();
@@ -50,6 +54,10 @@ public class BackupSynch {
 	}
 	
 	public synchronized void addChunk(String fileID, int n,int repDegree){
+		if(receivedChunk(fileID,n)){
+			notify();
+			return;
+		}
 		backupChunks.add(0,new ChunkInfo(fileID,n,repDegree));
 		notify();
 	}

@@ -63,7 +63,7 @@ public class MulticastMC extends Thread{
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
-				 		m.bs.addChunk(p.fileID, p.chunkN, p.repDegree);
+				 		m.bs.addChunk2(p.fileID, p.chunkN, p.repDegree);
 				 		break;
 				 	case DeleteProtocol.msgDelete:
 				 		if(indice != -1)
@@ -127,6 +127,7 @@ public class MulticastMC extends Thread{
 			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
 			if(rp.removeChunk(id + "/" +fileID)){
 				m.deleteFile(fileID);
+				m.deleteIDFile(fileID);
 			}
 			m.currSize-=rp.removedSize;
 		}

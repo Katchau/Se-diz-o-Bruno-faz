@@ -117,7 +117,7 @@ public class RMIServer implements ClientInterface {
 		String folderPath = ms.getId() + "/files";
 		String filename = fileID + "_" + file.lastModified();
 		File f = new File(folderPath, filename);
-		try (FileOutputStream out = new FileOutputStream(f,true)) {
+		try (FileOutputStream out = new FileOutputStream(f)) {
 			byte[] buffer = (path + "\r\n" + fileHash + "\r\n" + rep_degree + "\r\n").getBytes();
 			out.write(buffer, 0, buffer.length);
 		}
