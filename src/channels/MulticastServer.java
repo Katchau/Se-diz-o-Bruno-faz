@@ -1,7 +1,11 @@
 package channels;
 import rmi.*;
 import system.*;
+
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 //import java.net.DatagramPacket;
 //import java.net.DatagramSocket;
@@ -124,6 +128,40 @@ public class MulticastServer{
 	
 	public void deleteFile(String fileID){
 		fileB.remove(fileID);
+	}
+	
+	public void deleteIDFile(String fileID){
+		String folderPath = id + "/files";
+		File folder = new File(folderPath);
+		String value = "";
+		File f = null;
+		for(File file: folder.listFiles()){
+			try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+				byte[] buffer = new byte[1024];
+				int readValue = 0;
+				while((readValue = bis.read(buffer)) > 0){
+					value += new String(buffer,0,readValue);
+				}
+				String[] separate = value.split("\r\n"); //separar por new lines
+				
+				if(separate.length != 3){
+					System.err.println("Error: Reading File");
+					return;
+				}
+				
+				if(separate[1].equals(fileID)){
+					f = file;
+					break;		
+				}
+				
+			} catch (FileNotFoundException e) {
+				System.err.println("Error, file not found: "+ e.getMessage());
+			} catch (IOException e) {
+				System.err.println("Error: "+ e.getMessage());
+			}
+		}
+		
+		if(f != null)f.delete();
 	}
 	
 	public int getFolderIndex(String fileID){
