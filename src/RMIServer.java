@@ -88,7 +88,6 @@ public class RMIServer implements ClientInterface {
 		ms.maxSize = Integer.parseInt(size);
 		if(ms.currSize > ms.maxSize){
 			try {
-				System.out.println("wtf");
 				new MulticastMC(this.ms,ReclaimProtocol.msgRemoved, "");
 			} catch (IOException e) {
 				System.err.println("Error: Creating Reclaim Protocol");

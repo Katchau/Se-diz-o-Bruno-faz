@@ -19,13 +19,16 @@ public class MulticastServer{
 	private int peer_ap;
 	public static final String CRLF = "\r\n";
 	public static final String FSTORE = "files";
+	public final int ENHANCEMENTS = 2;
 	public long maxSize; // -1 equals unrestricted
 	public long currSize;
 	public ArrayList<String> fileB;
 	public RestoreSynch rs;
+	public BackupSynch bs;
 	
 	public MulticastServer(String args[]) throws IOException{
 		rs = new RestoreSynch();
+		bs = new BackupSynch();
 		this.version = (int)Double.parseDouble(args[0]);
 		maxSize = -1;
 		currSize = 0;
@@ -108,7 +111,7 @@ public class MulticastServer{
 				}
 			}
 		}
-		System.out.println("Space Occupied " + currSize );
+		System.out.println("Space Occupied " + currSize + " bytes" );
 	}
 	
 	public void storeNewFile(String fileID){

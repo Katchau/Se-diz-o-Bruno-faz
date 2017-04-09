@@ -28,30 +28,39 @@ public class MulticastMDB extends Thread{
 	private void createResponse(){
 		new Thread(new Runnable() {
 		     public void run() {
-				 BackupProtocol bp = new BackupProtocol(packet.getData(), packet.getLength());
-				 if(bp.state == 0 && bp.version == vrs && ( m.maxSize == -1 || m.maxSize >= bp.chunk.length + m.currSize)/*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
-					try {
-						sleep((long)bp.delay);
-						m.getFolderIndex(bp.fileID);
-						if(!bp.storeChunk(id + "/" + bp.fileID)) return;
-						bp.state = 1;
-						bp.id = id;
-						m.currSize+= bp.chunk.length;
-						new MulticastMC(l,bp.storeAnswer());
-					} catch (IOException e) {
-						System.err.println("Error: Sending Store chunk");
-					} catch (InterruptedException e) {
-						System.err.println("Error: Sleep was interrupted 4some reason");
-					}
-					
-				}
+				BackupProtocol bp = new BackupProtocol(packet.getData(), packet.getLength());
+                if(bp.state == 0 && bp.version == vrs && ( m.maxSize == -1 || m.maxSize >= bp.chunk.length + m.currSize)/*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
+                	saveChunk(bp);
+                }
 				else{
 					if(bp.state != 0)System.err.println("Error: Unrecognized Message received @MDB " + bp.subprotocol );
 					if(m.maxSize < bp.chunk.length + m.currSize) System.err.println("Error: Max Sized reached!");
 				}
-				//TODO para ter outras versões colocar aqi
 		     }
 		}).start();
+	}
+	
+	public void saveChunk(BackupProtocol bp){
+		try {
+			sleep((long)bp.delay);
+			if(vrs == m.ENHANCEMENTS){
+				int curRepDeg = m.bs.checkDesiredRepDegree(bp.fileID, bp.chunkN);
+				if(curRepDeg > repDegree) return;
+			}
+			m.getFolderIndex(bp.fileID);
+			if(!bp.storeChunk(id + "/" + bp.fileID)) {
+				m.deleteFile(bp.fileID);
+				return;
+			}
+			bp.state = 1;
+			bp.id = id;
+			m.currSize+= bp.chunk.length;
+			new MulticastMC(l,bp.storeAnswer());
+		} catch (IOException e) {
+			System.err.println("Error: Sending Store chunk");
+		} catch (InterruptedException e) {
+			System.err.println("Error: Sleep was interrupted 4some reason");
+		}
 	}
 	
 	public MulticastMDB(MulticastServer m, int repDegree) throws IOException{
@@ -79,7 +88,7 @@ public class MulticastMDB extends Thread{
 				try {
 					dataMC.receive(packet);
 					received = true;
-					System.out.println("Packet: " + new String(packet.getData()));
+					System.out.println("Packet Received! : " + new String(packet.getData()));
 				} catch (SocketTimeoutException e) {
 					System.out.println("Attempt nº " + nTries);
 					nTries++;
@@ -89,6 +98,7 @@ public class MulticastMDB extends Thread{
 					System.err.println("Error: During reception of savechunk");
 				}
 			}while(!received && nTries < 6);
+			if(!received) break;
 		}
 		dataMC.close();
 		return received;
@@ -103,7 +113,8 @@ public class MulticastMDB extends Thread{
 		    	 try {
 					data.send(packet);
 					System.out.println("Sent!");
-					gotSaveChunk(n);
+					if(!gotSaveChunk(n))
+						System.out.println("Didn't reveive any response for chunk nº"+ n);
 				} catch (IOException e) {
 					System.err.println("Error: Fail sending chunk");
 				}

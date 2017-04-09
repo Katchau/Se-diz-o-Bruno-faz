@@ -60,7 +60,7 @@ public class MulticastMC extends Thread{
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
-				 		new BackupProtocol(packet.getData(),packet.getLength());
+				 		m.bs.addChunk(p.fileID, p.chunkN, p.repDegree);
 				 		break;
 				 	case DeleteProtocol.msgDelete:
 				 		if(indice != -1)

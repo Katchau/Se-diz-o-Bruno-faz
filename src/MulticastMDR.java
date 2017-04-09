@@ -9,12 +9,10 @@ public class MulticastMDR extends Thread{
 	private InetAddress address;
 	private int id;
 	private int vrs; //version xpto
-	private Listener l;
 	private MulticastServer m;
 	private DatagramPacket packet;
 	
 	public MulticastMDR(Listener l, DatagramPacket packet) throws IOException{
-		this.l = l;
 		this.m = l.m;
 		id = l.id;
 		address = m.getMDRaddress();
@@ -27,7 +25,6 @@ public class MulticastMDR extends Thread{
 //			
 //		}
 	public MulticastMDR(Listener l){
-		this.l = l;
 		this.m = l.m;
 		id = l.id;
 		address = m.getMDRaddress();
