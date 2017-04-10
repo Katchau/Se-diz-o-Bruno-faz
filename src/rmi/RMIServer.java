@@ -164,7 +164,7 @@ public class RMIServer implements ClientInterface {
 				res += (">>Chunks:" + "\n");
 				for(int i = 3; i < separate.length - 1; i+=2){
 					res += (">>id: " + separate[i] + ", perceived replication degree: " + separate[i+1] + "\n");
-				}//flores pro souto :) :P
+				}
 				res += ("-----------------------------------\n");
 				
 			} catch (FileNotFoundException e) {
