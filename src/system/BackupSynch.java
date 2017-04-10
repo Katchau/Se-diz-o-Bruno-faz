@@ -2,6 +2,7 @@ package system;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class BackupSynch {
 	public  ArrayList<ChunkInfo> backupChunks;
@@ -120,9 +121,11 @@ public class BackupSynch {
 	}
 	
 	public synchronized void deleteAllChunks(String fileID){
-		for(ChunkInfo ci : backupChunks){
-			if(ci.fileID.equals(fileID))
-				backupChunks.remove(ci);
+		for (Iterator<ChunkInfo> iterator = backupChunks.iterator(); iterator.hasNext(); ) {
+		    ChunkInfo value = iterator.next();
+		    if (value.fileID.equals(fileID)) {
+		        iterator.remove();
+		    }
 		}
 		notify();
 	}
