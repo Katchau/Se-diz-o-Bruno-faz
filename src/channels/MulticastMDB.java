@@ -40,7 +40,7 @@ public class MulticastMDB extends Thread{
                 }
 				else{
 					if(bp.state != 0)System.err.println("Error: Unrecognized Message received @MDB " + bp.subprotocol );
-					if(m.maxSize < bp.chunk.length + m.currSize) System.err.println("Error: Max Sized reached!");
+					if(m.maxSize != -1 && m.maxSize < bp.chunk.length + m.currSize) System.err.println("Error: Max Sized reached!");
 					m.rs.deleteChunk(bp.fileID, bp.chunkN);
 				}
 		     }
