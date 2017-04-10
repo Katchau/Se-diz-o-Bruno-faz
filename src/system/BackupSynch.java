@@ -26,6 +26,17 @@ public class BackupSynch {
 		return false;
 	}
 	
+	public synchronized boolean checkFileID(String fileID){
+		for(ChunkInfo ci : backupChunks){
+			if(ci.fileID.equals(fileID)){
+				notify();
+				return true;
+			}
+		}
+		notify();
+		return false;
+	}
+	
 	public synchronized boolean receivedChunk(String fileID, int n,int repDegree){
 		ChunkInfo c = new ChunkInfo(fileID,n);
 		for(ChunkInfo ci : backupChunks){

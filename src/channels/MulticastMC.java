@@ -35,8 +35,15 @@ public class MulticastMC extends Thread{
 		vrs = m.getVersion();
 		data = m.getMCdata();
 		byte []buffer = new Protocol(vrs,id,fileID).answer(protocol).getBytes();
-		if(protocol.equals(DeleteProtocol.msgDelete))
-			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
+		DatagramPacket packet = new DatagramPacket(buffer,buffer.length,address,data.getLocalPort());
+		if(protocol.equals(DeleteProtocol.msgDelete)){
+				if(vrs != m.ENHANCEMENTS)
+					data.send(packet);
+				else{
+					sendDeleteSpammer(packet,fileID);
+				}
+			}
+				
 		if(protocol.equals(ReclaimProtocol.msgRemoved))
 			deleteFiles();
 	}
@@ -144,6 +151,25 @@ public class MulticastMC extends Thread{
 		 			nChunk++;
 		 		}while (moreChunks);
 		 		return chunks;
+	}
+
+	public void sendDeleteSpammer(DatagramPacket packet,String fileID){
+		new Thread(new Runnable() {
+		     public void run() {
+		    	 long endTime = System.currentTimeMillis() + 3600000;//3 600 000 = 2h in milliseconds
+		    	 do{
+		    		 try {
+		    			 System.out.println("Sending Delete");
+						data.send(packet);
+						sleep(60000); //send delete every minute
+						if(m.bs.checkFileID(fileID))return;
+		    		 } catch (IOException | InterruptedException e) {
+		    			 System.out.println("Error: Sending Delete spammer");
+		    		 }
+		    		 
+		    	 }while(endTime > System.currentTimeMillis());
+		     }
+		}).start();
 	}
 	
 	public void deleteFiles() throws IOException{

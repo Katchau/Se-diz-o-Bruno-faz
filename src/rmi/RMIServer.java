@@ -72,7 +72,7 @@ public class RMIServer implements ClientInterface {
 				break;
 			}
 		}
-		if(delete)f.delete();
+		if(delete && f!=null)f.delete();
 		return ret;
 	}
 	
