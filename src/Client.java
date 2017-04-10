@@ -71,7 +71,7 @@ public class Client {
 		byte[] buffer = new byte[BackupFile.maxSize];
 		File file = new File(filePath);
 		if(!file.exists()){
-			System.out.println("Oh meu ganda burro, " + filePath + " não existe!");
+			System.out.println("Oh meu ganda burro, " + filePath + " nï¿½o existe!");
 			return;
 		}
 		String hashname = createHash(file);
