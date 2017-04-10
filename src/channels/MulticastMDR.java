@@ -23,9 +23,6 @@ public class MulticastMDR extends Thread{
 		this.packet = packet;
 		createResponse();
 	}
-//	if(rp.readChunk(id + "/" + rp.fileID)){
-//			
-//		}
 	public MulticastMDR(Listener l){
 		this.m = l.m;
 		id = l.id;

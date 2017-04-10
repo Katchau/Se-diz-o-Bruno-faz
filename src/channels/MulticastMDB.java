@@ -56,6 +56,9 @@ public class MulticastMDB extends Thread{
 					System.err.println("Replication degree already achieved.");
 					return;
 				}
+				else{
+					m.storeStored(bp.fileID, bp.chunkN, curRepDeg);
+				}
 			}
 			bp.state = 1;
 			bp.id = id;

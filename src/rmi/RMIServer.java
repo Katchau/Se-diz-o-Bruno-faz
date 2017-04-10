@@ -21,8 +21,6 @@ public class RMIServer implements ClientInterface {
 		this.ms = ms;
 		try {
 			ClientInterface stub = (ClientInterface) UnicastRemoteObject.exportObject(this, 0); //:)
-
-			// Bind the remote object's stub in the registry
 			Registry registry = LocateRegistry.getRegistry(peer_ap);
 			registry.bind("ClientInterface", stub);
 
@@ -116,9 +114,10 @@ public class RMIServer implements ClientInterface {
 		String fileID = filePath[filePath.length - 1];
 		String folderPath = ms.getId() + "/files";
 		String filename = fileID + "_" + file.lastModified();
+		int perceived = ms.updateCurRepDeg(fileHash);
 		File f = new File(folderPath, filename);
 		try (FileOutputStream out = new FileOutputStream(f)) {
-			byte[] buffer = (path + "\r\n" + fileHash + "\r\n" + rep_degree + "\r\n").getBytes();
+			byte[] buffer = (path + "\r\n" + fileHash + "\r\n" + rep_degree + "\r\n" + perceived + "\r\n").getBytes();
 			out.write(buffer, 0, buffer.length);
 		}
 		catch(IOException e){

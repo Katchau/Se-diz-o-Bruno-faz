@@ -62,16 +62,38 @@ public class BackupSynch {
 		notify();
 	}
 	
-	public synchronized void addChunk2(String fileID, int n,int repDegree){
+	public synchronized int addChunk2(String fileID, int n,int repDegree){
 		ChunkInfo cf = new ChunkInfo(fileID,n,repDegree);
 		for(ChunkInfo ci : backupChunks){
 			if(ci.equals(cf)){
 				ci.curRepDeg++;
 				notify();
-				return;
+				return ci.curRepDeg;
 			}
 		}
 		backupChunks.add(0,cf);
+		notify();
+		return 1;
+	}
+	
+	public synchronized void deleteAllChunks(String fileID){
+		for(ChunkInfo ci : backupChunks){
+			if(ci.fileID.equals(fileID))
+				backupChunks.remove(ci);
+		}
+		notify();
+	}
+	
+	public synchronized void decreaseChunk(String fileID, int n){
+		ChunkInfo cf = new ChunkInfo(fileID,n);
+		for(ChunkInfo ci : backupChunks){
+			if(ci.equals(cf)){
+				ci.curRepDeg--;
+				if(ci.curRepDeg == 0) backupChunks.remove(ci);
+				notify();
+				return;
+			}
+		}
 		notify();
 	}
 	

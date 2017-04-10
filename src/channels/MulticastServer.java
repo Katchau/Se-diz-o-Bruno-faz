@@ -6,6 +6,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 //import java.net.DatagramPacket;
 //import java.net.DatagramSocket;
@@ -26,6 +27,7 @@ public class MulticastServer{
 	private int peer_ap;
 	public static final String CRLF = "\r\n";
 	public static final String FSTORE = "files";
+	public static final String STORE = "storeds";
 	public final int ENHANCEMENTS = 2;
 	public long maxSize; // -1 equals unrestricted
 	public long currSize;
@@ -108,6 +110,7 @@ public class MulticastServer{
 		if(!folder.exists()){
 			folder.mkdir();
 			new File(folder,FSTORE).mkdir();
+			new File(folder,STORE).mkdir();
 			return;
 		}
 		for(File f : folder.listFiles()){
@@ -128,6 +131,44 @@ public class MulticastServer{
 	
 	public void deleteFile(String fileID){
 		fileB.remove(fileID);
+	}
+	
+	public void deleteStored(String fileID){
+		File folder = new File(id + "/" + STORE);
+		for(File f : folder.listFiles()){
+			if(f.getName().contains(fileID))
+				f.delete();
+		}
+	}
+	
+	public int updateCurRepDeg(String fileID){
+		File folder = new File(id + "/" + STORE);
+		int lowestRp = 1000;
+		for(File f : folder.listFiles()){
+			if(f.getName().contains(fileID)){
+				try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f))) {
+					byte[] buffer = new byte[1024];
+					int readValue = bis.read(buffer);
+					int value = Integer.parseInt(new String(buffer,0,readValue));
+					lowestRp = (value < lowestRp) ? value : lowestRp;
+				} catch (IOException e) {
+					System.err.println("Error: Updating perceived replication degree");
+				}
+			}	
+		}
+		return lowestRp;
+	}
+	
+	public void storeStored(String fileID, int n, int repDeg){
+		File f = new File(id + "/" + STORE,fileID + " " + n);
+		String s = "" + repDeg;
+		try {
+			FileOutputStream out = new FileOutputStream(f);
+			out.write(s.getBytes(), 0, s.getBytes().length);
+			out.close();
+		} catch (Exception e) {
+			System.err.println("Error: Write File " + e.getMessage());
+		}
 	}
 	
 	public void deleteIDFile(String fileID){

@@ -38,8 +38,6 @@ public class MulticastMC extends Thread{
 			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
 		if(protocol.equals(ReclaimProtocol.msgRemoved))
 			deleteFiles();
-//		if(protocol.equals(RestoreProtocol.msgRestore))
-//			restoreFile(fileID);
 	}
 	
 	
@@ -63,7 +61,13 @@ public class MulticastMC extends Thread{
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
-				 		m.bs.addChunk2(p.fileID, p.chunkN, p.repDegree);
+				 		int curRepDeg = m.bs.addChunk2(p.fileID, p.chunkN, p.repDegree);
+				 		if(vrs != m.ENHANCEMENTS)m.storeStored(p.fileID, p.chunkN, curRepDeg);
+				 		else {
+				 			BackupProtocol  bp= new BackupProtocol(packet.getData(), packet.getLength());
+				 			if(bp.repeatedChunk(id + "/" + p.fileID))
+				 				m.storeStored(p.fileID, p.chunkN, curRepDeg);
+				 		} 			
 				 		break;
 				 	case DeleteProtocol.msgDelete:
 				 		if(indice != -1)
@@ -118,7 +122,6 @@ public class MulticastMC extends Thread{
 	}
 	
 	public void deleteFiles() throws IOException{
-		//TODO apagar aqueles ficheiros no files
 		while(m.maxSize < m.currSize){
 			System.out.println("Current size "  + m.currSize);
 			String fileID =  m.fileB.get(0);
@@ -129,6 +132,8 @@ public class MulticastMC extends Thread{
 				m.deleteFile(fileID);
 				m.deleteIDFile(fileID);
 			}
+			m.storeStored(fileID, rp.chunkN, m.bs.checkDesiredRepDegree(fileID, rp.chunkN)-1);
+			m.bs.decreaseChunk(fileID, rp.chunkN);
 			m.currSize-=rp.removedSize;
 		}
 		
@@ -139,6 +144,8 @@ public class MulticastMC extends Thread{
 		m.currSize -= dp.sizeDeleted;
 		if(m.currSize < 0)m.currSize = 0; 
 		m.deleteFile(fileID);
+		m.bs.deleteAllChunks(fileID);
+		m.deleteStored(fileID);
 	}
 	
 	public void run(){
