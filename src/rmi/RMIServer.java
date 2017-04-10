@@ -124,7 +124,6 @@ public class RMIServer implements ClientInterface {
 		catch(IOException e){
 			System.err.println("Error: Making Info File " + e.getMessage());
 		}
-		
 	}
 	
 	public void getState(){
@@ -140,21 +139,49 @@ public class RMIServer implements ClientInterface {
 				}
 				String[] separate = value.split("\r\n"); //separar por new lines
 				
-				if(separate.length != 3){
-					System.err.println("Error: Reading File");
-					return;
-				}
-				
+								
 				System.out.println("File: " + file.getName());
-				System.out.println(" path: " + separate[0]);
-				System.out.println(" fileID: " + separate[1]);
-				System.out.println(" Replication Degree: " + separate[2]);
+				System.out.println(">path: " + separate[0]);
+				System.out.println(">fileID: " + separate[1]);
+				System.out.println(">Replication Degree: " + separate[2]);
 				System.out.println("-----------------------------------");
 				
 			} catch (FileNotFoundException e) {
 				System.err.println("Error, file not found: "+ e.getMessage());
 			} catch (IOException e) {
 				System.err.println("Error: "+ e.getMessage());
+			}
+		}
+		for(int i = 0; i < ms.fileB.size(); i++){
+			String newfolderPath = ms.getId() + "/" + ms.fileB.get(i);
+			folder = new File(newfolderPath);
+			int repDegree = 0;
+			value = "";
+			for(File fileF: folder.listFiles()){
+				int chunkN = Integer.parseInt(fileF.getName());
+				File repFolder = new File(ms.getId() + "/storeds");
+				String repFileName = ms.fileB.get(i) + " " + chunkN;
+				File repFile = new File(repFolder, repFileName);
+				try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(repFile))) {
+					byte[] buffer = new byte[1024];
+					int readValue = 0;
+					while((readValue = bis.read(buffer)) > 0){
+						value += new String(buffer,0,readValue);
+					}
+					repDegree = Integer.parseInt(value);
+					
+					
+				} catch (FileNotFoundException e) {
+					System.err.println("Error, file not found: "+ e.getMessage());
+				} catch (IOException e) {
+					System.err.println("Error: "+ e.getMessage());
+				}
+				System.out.println("Chunk of File: " + ms.fileB.get(i));
+				System.out.println(">id: " + fileF.getName());
+				System.out.println(">size: " + fileF.getTotalSpace());
+				System.out.println(">Replication Degree: " + repDegree);
+				System.out.println("-----------------------------------");
+				
 			}
 		}
 	}
