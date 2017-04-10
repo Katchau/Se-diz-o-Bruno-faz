@@ -131,7 +131,6 @@ public class RMIServer implements ClientInterface {
 		String fileID = filePath[filePath.length - 1];
 		String folderPath = ms.getId() + "/files";
 		String filename = fileID + "_" + file.lastModified();
-		int perceived = ms.updateCurRepDeg(fileHash);
 		File f = new File(folderPath, filename);
 		try (FileOutputStream out = new FileOutputStream(f)) {
 			byte[] buffer = (path + "\r\n" + fileHash + "\r\n" + rep_degree ).getBytes();
@@ -142,6 +141,7 @@ public class RMIServer implements ClientInterface {
 		}
 	}
 	
+	//ai jesus
 	public String getState(){
 		String res = "";
 		String folderPath = ms.getId() + "/files";
@@ -164,7 +164,7 @@ public class RMIServer implements ClientInterface {
 				res += (">>Chunks:" + "\n");
 				for(int i = 3; i < separate.length - 1; i+=2){
 					res += (">>id: " + separate[i] + ", perceived replication degree: " + separate[i+1] + "\n");
-				}
+				}//flores pro souto :) :P
 				res += ("-----------------------------------\n");
 				
 			} catch (FileNotFoundException e) {
@@ -180,6 +180,7 @@ public class RMIServer implements ClientInterface {
 			value = "";
 			for(File fileF: folder.listFiles()){
 				int chunkN = Integer.parseInt(fileF.getName());
+				value = "";
 				File repFolder = new File(ms.getId() + "/storeds");
 				String repFileName = ms.fileB.get(i) + " " + chunkN;
 				File repFile = new File(repFolder, repFileName);
@@ -199,7 +200,7 @@ public class RMIServer implements ClientInterface {
 				}
 				res += ("Chunk of File: " + ms.fileB.get(i) + "\n");
 				res += (">id: " + fileF.getName() + "\n");
-				res += (">size: " + fileF.getTotalSpace() + "\n");
+				res += (">size: " + fileF.length() + "\n");
 				res += (">Replication Degree: " + repDegree + "\n");
 				res += ("-----------------------------------\n");
 				

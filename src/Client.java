@@ -60,6 +60,7 @@ public class Client {
     	    	  break;
     	      case "STATE":
     	    	  System.out.println(stub.getState());
+    	    	  System.in.read();//waits for an enter
     	    	  break;
     	      default: 
                   System.err.println("Error in sub-protocol"); 

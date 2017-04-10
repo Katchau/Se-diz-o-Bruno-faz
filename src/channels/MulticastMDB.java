@@ -71,6 +71,7 @@ public class MulticastMDB extends Thread{
 			m.currSize+= bp.chunk.length;
 			new MulticastMC(l,bp.storeAnswer());
 			m.getFolderIndex(bp.fileID);
+			m.storeStored(bp.fileID, bp.chunkN, 1);
 			if(!bp.storeChunk(id + "/" + bp.fileID)) {
 				System.err.println("Error: Writting chunk @MDB");
 				return;
