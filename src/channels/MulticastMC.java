@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MulticastMC extends Thread{
 	private MulticastSocket data;
@@ -61,7 +62,7 @@ public class MulticastMC extends Thread{
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
-				 		int curRepDeg = m.bs.addChunk2(p.fileID, p.chunkN, p.repDegree);
+				 		int curRepDeg = m.bs.addChunk2(p.fileID, p.chunkN, 1);
 				 		if(vrs != m.ENHANCEMENTS)m.storeStored(p.fileID, p.chunkN, curRepDeg);
 				 		else {
 				 			BackupProtocol  bp= new BackupProtocol(packet.getData(), packet.getLength());
@@ -95,9 +96,26 @@ public class MulticastMC extends Thread{
 	}
 	
 	public void reclaimFileRestore(RestoreProtocol rp){
+		int curRepDeg = m.bs.checkDesiredRepDegree(rp.fileID, rp.chunkN) - 1;//since 1 was deleted
+		int desired = m.bs.checkRepDegree(rp.fileID, rp.chunkN);
+		rp.repDegree = desired;
 		rp.id = id;
 		rp.readChunk(id + "/" + rp.fileID);
 		byte[] buff = rp.request2();
+		if(curRepDeg < desired){
+			Random r = new Random();
+			try {
+				sleep(r.nextInt(BackupProtocol.MAXDELAY));
+				if(!m.rs.receivedChunk(rp.fileID, rp.chunkN)){
+					new MulticastMDB(m,1).sendChunk(rp.fileID, rp.chunkN, buff, buff.length);
+				}
+			} catch (InterruptedException e) {
+				System.err.println("Error: interrupted delay at Reclaim function");
+			} catch (IOException e) {
+				System.err.println("Error: Sending PUTCHUNK");
+			}
+		}
+		
 	}
 	
 	public ArrayList<byte[]> restoreFile(String fileID){
@@ -133,15 +151,15 @@ public class MulticastMC extends Thread{
 			System.out.println("Current size "  + m.currSize);
 			String fileID =  m.fileB.get(0);
 			ReclaimProtocol rp = new ReclaimProtocol(vrs,id,fileID);
-			byte[] buffer = rp.request();
-			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
 			if(rp.removeChunk(id + "/" +fileID)){
 				m.deleteFile(fileID);
 				m.deleteIDFile(fileID);
 			}
+			byte[] buffer = rp.request();
 			m.storeStored(fileID, rp.chunkN, m.bs.checkDesiredRepDegree(fileID, rp.chunkN)-1);
 			m.bs.decreaseChunk(fileID, rp.chunkN);
 			m.currSize-=rp.removedSize;
+			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
 		}
 		
 	}

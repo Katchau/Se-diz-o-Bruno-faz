@@ -14,6 +14,26 @@ public class BackupSynch {
 		ChunkInfo c = new ChunkInfo(fileID,n);
 		for(ChunkInfo ci : backupChunks){
 			if(ci.equals(c)){
+				if(ci.curRepDeg == 0){
+					notify();
+					return false;
+				}
+				notify();
+				return true;
+			}
+		}
+		notify();
+		return false;
+	}
+	
+	public synchronized boolean receivedChunk(String fileID, int n,int repDegree){
+		ChunkInfo c = new ChunkInfo(fileID,n);
+		for(ChunkInfo ci : backupChunks){
+			if(ci.equals(c)){
+				if(ci.curRepDeg != repDegree){
+					notify();
+					return false;
+				}
 				notify();
 				return true;
 			}
@@ -34,6 +54,18 @@ public class BackupSynch {
 		return true;
 	}
 	
+	public synchronized int checkRepDegree(String fileID, int n){
+		ChunkInfo c = new ChunkInfo(fileID,n);
+		for(ChunkInfo ci : backupChunks){
+			if(ci.equals(c)){
+				notify();
+				return ci.repDeg;
+			}
+		}
+		notify();
+		return 0;
+	}
+	
 	public synchronized int checkDesiredRepDegree(String fileID, int n){
 		ChunkInfo c = new ChunkInfo(fileID,n);
 		for(ChunkInfo ci : backupChunks){
@@ -46,8 +78,8 @@ public class BackupSynch {
 		return 0;
 	}
 	
-	public synchronized void waitChunk(String fileID, int nChunk) throws InterruptedException{
-		while(!receivedChunk(fileID, nChunk)){
+	public synchronized void waitChunk(String fileID, int nChunk, int rep) throws InterruptedException{
+		while(!receivedChunk(fileID, nChunk, rep)){
 			wait();
 		}
 		notify();
@@ -58,7 +90,7 @@ public class BackupSynch {
 			notify();
 			return;
 		}
-		backupChunks.add(0,new ChunkInfo(fileID,n,repDegree));
+		backupChunks.add(0,new ChunkInfo(fileID,n,repDegree,0));
 		notify();
 	}
 	
@@ -89,7 +121,7 @@ public class BackupSynch {
 		for(ChunkInfo ci : backupChunks){
 			if(ci.equals(cf)){
 				ci.curRepDeg--;
-				if(ci.curRepDeg == 0) backupChunks.remove(ci);
+//				if(ci.curRepDeg == 0) backupChunks.remove(ci);
 				notify();
 				return;
 			}

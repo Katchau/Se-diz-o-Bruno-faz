@@ -34,7 +34,14 @@ public class RestoreSynch {
 	}
 	
 	public synchronized void deleteChunk(String fileID, int n){
-		restoredChunks.remove(new ChunkInfo(fileID,n));
+		ChunkInfo cf = new ChunkInfo(fileID,n);
+		for(ChunkInfo ci : restoredChunks){
+			if(ci.equals(cf)){
+				restoredChunks.remove(ci);
+				notify();
+				return;
+			}
+		}
 		notify();
 	}
 	

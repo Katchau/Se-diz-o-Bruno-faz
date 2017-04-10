@@ -19,7 +19,7 @@ public class RestoreProtocol extends Protocol{
 	}
 	
 	public RestoreProtocol(int version,int senderID, String fileID,int chunkN){
-		super(version,senderID,fileID,chunkN,0);//kek
+		super(version,senderID,fileID,chunkN,1);
 	}
 	
 	public boolean readChunk(String folder){

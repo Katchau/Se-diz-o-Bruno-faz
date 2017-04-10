@@ -31,6 +31,13 @@ public class ChunkInfo {
 		curRepDeg = 1;
 	}
 	
+	public ChunkInfo(String f, int n, int repDeg,int cur){
+		fileID = f;
+		this.n = n;
+		this.repDeg = repDeg;
+		curRepDeg = cur;
+	}
+	
 	public boolean equals(ChunkInfo c){
 		return (c.fileID.equals(fileID) && n == c.n);
 	}
