@@ -114,7 +114,7 @@ public class MulticastServer{
 			return;
 		}
 		for(File f : folder.listFiles()){
-			if(!f.getName().equals(FSTORE)){
+			if(!f.getName().equals(FSTORE) && !f.getName().equals(STORE)){
 				fileB.add(f.getName());
 				for(File ff : f.listFiles()){
 					currSize += ff.length();

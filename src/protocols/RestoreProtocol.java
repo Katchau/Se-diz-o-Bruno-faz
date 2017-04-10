@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import channels.MulticastServer;
+
 public class RestoreProtocol extends Protocol{
 	public static final String msgRestore = "GETCHUNK";
 	public static final String msgRR = "CHUNK";
@@ -45,5 +47,16 @@ public class RestoreProtocol extends Protocol{
 	
 	public byte[] request(){
 		return request(msgRestore).getBytes();
+	}
+	public String request2(String subprotocol, int repDegree){
+		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + repDegree + " " + MulticastServer.CRLF + MulticastServer.CRLF;
+	}
+	
+	public byte[] request2(){
+		byte[] header = request2(BackupProtocol.msgTypeSend,1).getBytes();
+		byte[] request = new byte[header.length + chunk.length];
+	    System.arraycopy(header, 0, request, 0, header.length);
+	    System.arraycopy(chunk, 0, request, header.length, chunk.length);
+	    return request;
 	}
 }

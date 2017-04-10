@@ -81,9 +81,10 @@ public class MulticastMC extends Thread{
 				 		}
 				 		break;
 				 	case ReclaimProtocol.msgRemoved:
-				 		//TODO fazer isto dp :)
-				 		System.out.println("Não me apetece fazer isto xp");
-				 		//TODO isto usa a pseudo melhoria do restore
+				 		if(indice != -1){
+				 			RestoreProtocol rp = new RestoreProtocol(packet.getData(),packet.getLength());
+				 			reclaimFileRestore(rp);
+				 		}
 				 		break;
 				 	default:
 				 		System.err.println("Error: Unrecognized Message received @MC " + p.subprotocol );
@@ -91,6 +92,12 @@ public class MulticastMC extends Thread{
 				 }
 		     }
 		}).start();
+	}
+	
+	public void reclaimFileRestore(RestoreProtocol rp){
+		rp.id = id;
+		rp.readChunk(id + "/" + rp.fileID);
+		byte[] buff = rp.request2();
 	}
 	
 	public ArrayList<byte[]> restoreFile(String fileID){
