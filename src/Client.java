@@ -59,14 +59,16 @@ public class Client {
     	    	  stub.setMaxSize(args[2]);
     	    	  break;
     	      case "STATE":
-    	    	  stub.getState();
+    	    	  System.out.println(stub.getState());
     	    	  break;
     	      default: 
                   System.err.println("Error in sub-protocol"); 
                   break;
     	      }
       } catch (Exception e){ 
-            System.err.println("Error: Client exception: " + e.toString()); 
+    	  
+            System.err.println("Error: Client exception: "  ); 
+            e.printStackTrace();
       } 
     } 
     
@@ -86,22 +88,22 @@ public class Client {
 		String hashname = createHash(file);
 		if(hashname.equals(""))return;
 		
+		try {
+			stub.saveFileInfo(filePath, hashname, rep_degree, file);
+		} catch (RemoteException e1) {
+			System.err.println("Error:" + e1.getMessage());
+		}
 		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
 			int readValue = 0;
 			while ((readValue = bis.read(buffer)) > 0) {
 				byte[] message = Arrays.copyOfRange(buffer, 0, readValue);
-				stub.sendChunk(rep_degree, hashname,++partCounter, message, readValue);
+				stub.sendChunk(rep_degree, hashname,++partCounter, message, readValue, filePath, file);
 			}
 			if(file.length()%BackupFile.maxSize == 0){
-				stub.sendChunk(rep_degree, hashname,++partCounter, "".getBytes(),0);
+				stub.sendChunk(rep_degree, hashname,++partCounter, "".getBytes(),0, filePath, file);
 			}
 		}catch(IOException e){
 			System.err.println("Ups i did it again");
-		}
-        try {
-			stub.saveFileInfo(filePath, hashname, rep_degree, file);
-		} catch (RemoteException e1) {
-			System.err.println("Error:" + e1.getMessage());
 		}
 	}
 	

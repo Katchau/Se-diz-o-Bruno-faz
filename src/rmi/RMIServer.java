@@ -31,10 +31,11 @@ public class RMIServer implements ClientInterface {
 		}
 	}
 	
-	public void sendChunk(int repDegree, String fileID, int n, byte[] buffer, int size){
+	public void sendChunk(int repDegree, String fileID, int n, byte[] buffer, int size, String path, File file){
 		try {
 			MulticastMDB mdb = new MulticastMDB(this.ms, repDegree);
 			mdb.sendChunk(fileID, n, buffer, size);
+			saveChunkInfo(path, repDegree, file, n);
 		} catch (IOException e) {
 			System.err.println("Error: Sending chunk");
 		}
@@ -110,6 +111,21 @@ public class RMIServer implements ClientInterface {
 		return chunks;
 	}
 	
+	public void saveChunkInfo(String path, int rep_degree, File file, int chunkID){
+		String[] filePath = path.split("/");
+		String fileID = filePath[filePath.length - 1];
+		String folderPath = ms.getId() + "/files";
+		String filename = fileID + "_" + file.lastModified();
+		File f = new File(folderPath, filename);
+		try (FileOutputStream out = new FileOutputStream(f, true)) {
+			byte[] buffer = ("\r\n"  + chunkID + "\r\n" + rep_degree).getBytes();
+			out.write(buffer, 0, buffer.length);
+		}
+		catch(IOException e){
+			System.err.println("Error: Making Info File " + e.getMessage());
+		}
+	}
+	
 	public void saveFileInfo(String path, String fileHash ,int rep_degree, File file){
 		String[] filePath = path.split("/");
 		String fileID = filePath[filePath.length - 1];
@@ -118,7 +134,7 @@ public class RMIServer implements ClientInterface {
 		int perceived = ms.updateCurRepDeg(fileHash);
 		File f = new File(folderPath, filename);
 		try (FileOutputStream out = new FileOutputStream(f)) {
-			byte[] buffer = (path + "\r\n" + fileHash + "\r\n" + rep_degree + "\r\n" + perceived + "\r\n").getBytes();
+			byte[] buffer = (path + "\r\n" + fileHash + "\r\n" + rep_degree ).getBytes();
 			out.write(buffer, 0, buffer.length);
 		}
 		catch(IOException e){
@@ -126,7 +142,8 @@ public class RMIServer implements ClientInterface {
 		}
 	}
 	
-	public void getState(){
+	public String getState(){
+		String res = "";
 		String folderPath = ms.getId() + "/files";
 		File folder = new File(folderPath);
 		String value = "";
@@ -140,11 +157,15 @@ public class RMIServer implements ClientInterface {
 				String[] separate = value.split("\r\n"); //separar por new lines
 				
 								
-				System.out.println("File: " + file.getName());
-				System.out.println(">path: " + separate[0]);
-				System.out.println(">fileID: " + separate[1]);
-				System.out.println(">Replication Degree: " + separate[2]);
-				System.out.println("-----------------------------------");
+				res += ("File: " + file.getName() + "\n");
+				res += (">path: " + separate[0] + "\n");
+				res += (">fileID: " + separate[1] + "\n");
+				res += (">Replication Degree: " + separate[2] + "\n");
+				res += (">>Chunks:" + "\n");
+				for(int i = 3; i < separate.length - 1; i+=2){
+					res += (">>id: " + separate[i] + ", perceived replication degree: " + separate[i+1] + "\n");
+				}
+				res += ("-----------------------------------\n");
 				
 			} catch (FileNotFoundException e) {
 				System.err.println("Error, file not found: "+ e.getMessage());
@@ -176,13 +197,14 @@ public class RMIServer implements ClientInterface {
 				} catch (IOException e) {
 					System.err.println("Error: "+ e.getMessage());
 				}
-				System.out.println("Chunk of File: " + ms.fileB.get(i));
-				System.out.println(">id: " + fileF.getName());
-				System.out.println(">size: " + fileF.getTotalSpace());
-				System.out.println(">Replication Degree: " + repDegree);
-				System.out.println("-----------------------------------");
+				res += ("Chunk of File: " + ms.fileB.get(i) + "\n");
+				res += (">id: " + fileF.getName() + "\n");
+				res += (">size: " + fileF.getTotalSpace() + "\n");
+				res += (">Replication Degree: " + repDegree + "\n");
+				res += ("-----------------------------------\n");
 				
 			}
 		}
+		return res;
 	}
 }
