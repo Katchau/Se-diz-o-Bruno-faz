@@ -33,6 +33,7 @@ public class MulticastMDR extends Thread{
 	
 	public void sendChunk(RestoreProtocol rp){
 		if(rp.readChunk(id + "/" + rp.fileID)){
+			rp.id = id;
 			byte []buff = rp.answer();
 			DatagramPacket packet = new DatagramPacket(buff,buff.length,address,data.getLocalPort());
 			try {
@@ -42,7 +43,7 @@ public class MulticastMDR extends Thread{
 					System.out.println("Sending Chunk " + rp.chunkN);
 					data.send(packet);
 				}
-				else m.rs.deleteChunk(rp.fileID, rp.chunkN);
+				m.rs.deleteChunk(rp.fileID, rp.chunkN);
 			} catch (IOException | InterruptedException e) {
 				System.err.println("Error: Sending Packet @MDR");
 			}
@@ -58,6 +59,9 @@ public class MulticastMDR extends Thread{
 				 switch(p.subprotocol){
 				 	case RestoreProtocol.msgRR:
 				 		if(indice != -1){
+				 			m.rs.addChunk(p.fileID,p.chunkN,p.chunk);
+				 		}
+				 		else if(m.bs.checkFileID(p.fileID)){
 				 			m.rs.addChunk(p.fileID,p.chunkN,p.chunk);
 				 		}
 				 		break;
