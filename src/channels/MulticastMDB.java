@@ -32,7 +32,7 @@ public class MulticastMDB extends Thread{
 		new Thread(new Runnable() {
 		     public void run() {
 				BackupProtocol bp = new BackupProtocol(packet.getData(), packet.getLength());
-                if(bp.state == 0 && bp.version == vrs && ( m.maxSize == -1 || m.maxSize >= bp.chunk.length + m.currSize)/*&& bp.id != id*/){//TODO remover isto quando ñ estiver em fase de testes
+                if(bp.state == 0 && bp.version == vrs && ( m.maxSize == -1 || m.maxSize >= bp.chunk.length + m.currSize)&& bp.id != id){
                 	m.rs.addChunk(bp.fileID, bp.chunkN, null);
                 	m.bs.addChunk(bp.fileID, bp.chunkN, bp.repDegree);
                 	saveChunk(bp);

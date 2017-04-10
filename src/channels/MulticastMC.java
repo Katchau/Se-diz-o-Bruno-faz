@@ -37,8 +37,10 @@ public class MulticastMC extends Thread{
 		byte []buffer = new Protocol(vrs,id,fileID).answer(protocol).getBytes();
 		DatagramPacket packet = new DatagramPacket(buffer,buffer.length,address,data.getLocalPort());
 		if(protocol.equals(DeleteProtocol.msgDelete)){
-				if(vrs != m.ENHANCEMENTS)
-					data.send(packet);
+				if(vrs != m.ENHANCEMENTS){
+						System.out.println("Sending Delete");
+						data.send(packet);
+					}
 				else{
 					sendDeleteSpammer(packet,fileID);
 				}
@@ -65,7 +67,7 @@ public class MulticastMC extends Thread{
 		new Thread(new Runnable() {
 		     public void run() {
 				 Protocol p = new Protocol(packet.getData(), packet.getLength());
-//				 if(p.id == id && p.version != vrs) return; TODO Remover comentario
+				 if(p.id == id || p.version != vrs) return;
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case BackupProtocol.msgTypeStored:
@@ -114,6 +116,7 @@ public class MulticastMC extends Thread{
 			try {
 				sleep(r.nextInt(BackupProtocol.MAXDELAY));
 				if(!m.rs.receivedChunk(rp.fileID, rp.chunkN)){
+					System.out.println("Sending PUTCHUNK");
 					new MulticastMDB(m,1).sendChunk(rp.fileID, rp.chunkN, buff, buff.length);
 				}
 			} catch (InterruptedException e) {
@@ -185,6 +188,7 @@ public class MulticastMC extends Thread{
 			m.storeStored(fileID, rp.chunkN, m.bs.checkDesiredRepDegree(fileID, rp.chunkN)-1);
 			m.bs.decreaseChunk(fileID, rp.chunkN);
 			m.currSize-=rp.removedSize;
+			System.out.println("Sending Remove");
 			data.send(new DatagramPacket(buffer,buffer.length,address,data.getLocalPort()));
 		}
 		
@@ -197,6 +201,7 @@ public class MulticastMC extends Thread{
 		m.deleteFile(fileID);
 		m.bs.deleteAllChunks(fileID);
 		m.deleteStored(fileID);
+		System.out.println(fileID + " was deleted successfully!");
 	}
 	
 	public void run(){

@@ -55,7 +55,7 @@ public class Protocol {
 	public void getHeader(String message){
 		String[] parts = message.split(" ");
 		subprotocol = parts[0];
-		version = Integer.parseInt(parts[1]);
+		version = (int)Double.parseDouble(parts[1]);
 		id = Integer.parseInt(parts[2]);
 		fileID = parts[3];
 		if(parts.length >= 5) chunkN = Integer.parseInt(parts[4]);

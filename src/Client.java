@@ -38,11 +38,20 @@ public class Client {
     	          rep_degree = Integer.parseInt(args[3]);
     	          readFile();
     	          break;
+    	      case "BACKUPENH": //isto ñ faz sentido xD
+    	          filePath = args[2];
+    	          rep_degree = Integer.parseInt(args[3]);
+    	          readFile();
+    	          break;
     	      case "RESTORE":
     	          filePath = args[2];
     	          restoreFile(filePath);
     	    	  break;
     	      case "DELETE":
+    	    	  filePath = args[2];
+    	    	  stub.deleteFile(filePath);
+    	    	  break;
+    	      case "DELETEENH":
     	    	  filePath = args[2];
     	    	  stub.deleteFile(filePath);
     	    	  break;

@@ -38,7 +38,10 @@ public class MulticastMDR extends Thread{
 			try {
 				Random r = new Random();
 				sleep(r.nextInt(BackupProtocol.MAXDELAY));
-				if(!m.rs.receivedChunk(rp.fileID,rp.chunkN))data.send(packet);
+				if(!m.rs.receivedChunk(rp.fileID,rp.chunkN)){
+					System.out.println("Sending Chunk " + rp.chunkN);
+					data.send(packet);
+				}
 				else m.rs.deleteChunk(rp.fileID, rp.chunkN);
 			} catch (IOException | InterruptedException e) {
 				System.err.println("Error: Sending Packet @MDR");
@@ -50,7 +53,7 @@ public class MulticastMDR extends Thread{
 		new Thread(new Runnable() {
 			public void run() {
 				 RestoreProtocol p = new RestoreProtocol(packet.getData(), packet.getLength());
-//				 if(p.id == id && p.version != vrs) return; TODO Remover comentario
+				 if(p.id == id || p.version != vrs) return;
 				 int indice = m.fileB.indexOf(p.fileID);
 				 switch(p.subprotocol){
 				 	case RestoreProtocol.msgRR:
