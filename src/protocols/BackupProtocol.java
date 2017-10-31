@@ -1,3 +1,5 @@
+package protocols;
+import channels.*;
 import java.io.File;
 //import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -47,9 +49,13 @@ public class BackupProtocol extends Protocol{
 		}
 	}
 	
+	public boolean repeatedChunk(String folder){
+		File newFile = new File(folder,String.format("%06d", chunkN));
+		return newFile.exists();
+	}
+	
 	public boolean storeChunk(String folder){
 		File newFile = new File(folder,String.format("%06d", chunkN));
-		if(newFile.exists()) return false;
 		try {
 			FileOutputStream out = new FileOutputStream(newFile);
 			out.write(chunk, 0, chunk.length);

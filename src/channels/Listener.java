@@ -1,3 +1,6 @@
+package channels;
+import system.*;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -65,7 +68,7 @@ public class Listener extends Thread {
 						new MulticastMDB(this, packet);
 						break;
 					case "MDR":
-//						new MulticastMDR();
+						new MulticastMDR(this, packet);
 						break;
 				}
 	    	}

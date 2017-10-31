@@ -1,3 +1,6 @@
+package protocols;
+import channels.*;
+
 import java.util.Arrays;
 
 public class Protocol {
@@ -52,7 +55,7 @@ public class Protocol {
 	public void getHeader(String message){
 		String[] parts = message.split(" ");
 		subprotocol = parts[0];
-		version = Integer.parseInt(parts[1]);
+		version = (int)Double.parseDouble(parts[1]);
 		id = Integer.parseInt(parts[2]);
 		fileID = parts[3];
 		if(parts.length >= 5) chunkN = Integer.parseInt(parts[4]);
@@ -63,7 +66,7 @@ public class Protocol {
 		return subprotocol + " " + version + " " + id + " " + fileID + " " + MulticastServer.CRLF + MulticastServer.CRLF;
 	}
 	
-	//TODO mudar este se for preciso
+	//TODO x) eheh
 	public String request(String subprotocol){
 		return subprotocol + " " + version + " " + id + " " + fileID + " " + chunkN + " " + MulticastServer.CRLF + MulticastServer.CRLF;
 	}
